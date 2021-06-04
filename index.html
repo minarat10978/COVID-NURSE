@@ -1,0 +1,3966 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Waste Collection Office | EIT</title>
+<!--     <link rel="stylesheet" href="css/style.css" media="all"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+   
+
+    <style type="text/css">
+    html { height: 100% }
+  
+    /* css กำหนดความกว้าง ความสูงของแผนที่ */
+    #map_canvas { 
+        width:100%;
+        height:200px;
+       
+    /*  margin-top:100px;*/
+    }
+    .redbar{
+ text-align: center;
+border-image: none;
+border-radius: 3px !important;
+border-left: 3px solid red !important;
+border-right: 3px solid red !important;
+display: block !important;
+width: 150px !important;
+margin: 0px auto;
+  float: none;
+}
+.redbarx{
+ text-align: center;
+border-image: none;
+border-radius: 3px !important;
+border-left: 3px solid green !important;
+border-right: 3px solid green !important;
+display: block !important;
+width: 150px !important;
+margin: 0px auto;
+  float: none;
+}
+    </style>
+      <style>
+          #pictureUrl { display: block; margin: 0 auto }
+        </style>
+         
+  </head>
+  <body>
+
+    
+<script>
+
+</script>
+    
+      <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+       <script>
+          function runApp() {
+            liff.getProfile().then(profile => {
+              document.getElementById("pictureUrl").src = profile.pictureUrl;
+              document.getElementById("userId").innerHTML = '<b>UserId:</b> ' + profile.userId;
+              document.getElementById("userId2").innerHTML = profile.userId;
+              document.getElementById("displayName").innerHTML =  profile.displayName;
+             
+            }).catch(err => console.error(err));
+          }
+          liff.init({ liffId: "1655763608-obLZEKQx" }, () => {
+            if (liff.isLoggedIn()) {
+              runApp()
+            } else {
+              liff.login();
+            }
+          }).then(() => {
+              // start to use LIFF's api
+              initializeApp();
+          })
+          .catch((err) => {
+            
+          });
+         
+        </script>  
+	   <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-app.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-firestore.js"></script>
+		<script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-storage.js"></script>
+			<script>
+		
+		  var firebaseConfig = {
+		    apiKey: "AIzaSyC_U-Etnw_w6uMMkTLJr89KoJS9MIA3dEc",
+		    authDomain: "waste-collection-data.firebaseapp.com",
+		    projectId: "waste-collection-data",
+		    storageBucket: "waste-collection-data.appspot.com",
+		    messagingSenderId: "707429673316",
+		    appId: "1:707429673316:web:49d9323a9b1482851ff271",
+		    measurementId: "G-JJL1GFE7WB"
+		  };
+		  // Initialize Firebase
+		  firebase.initializeApp(firebaseConfig);
+				
+				 function uploadData(){
+				  let file = document.getElementById('files').files[0]
+				  console.log(file)
+			          
+				  var storageRef = firebase.storage().ref('LDEP/'+ file.name);
+				 console.log(storageRef)
+				  storageRef.put(file).then(res=>{
+					console.log('Upload Success')  
+				  }).catch(e=>{
+					  console.log('Error'+ e)  
+				  })
+				  }
+
+		</script>
+<div id="test1" style="display:show" > </div>
+
+          <div class="container">
+
+        <form>
+            <div align="center">
+      <img style="display: none;" id="pictureUrl" style="width:80px; border-radius:60px;">
+      <p style="display: none;" id="userId"></p>
+      <p style="display: none;" id="userId2"></p>
+      <p style="display: none;" id="displayName" style="font-size: 15px;" ></p>
+    </div>
+            <div class="card-header" style="padding-bottom: 0%;color: #fff;background-color: #007bff;border-color: #007bff;font-weight: 400">
+                <label class="card-title">บันทึกปริมาณขยะ</label>
+            </div>          
+           <div style="display: none;" align="center" id="map_canvas"></div>      
+       <div id="showDD" >
+       <input style="display: none;" name="lat_value" id="lat_value" value="">
+       <input style="display: none;" name="lon_value" id="lon_value" value="">
+       <input style="display: none;" name="userId2" id="userId2" value="">  
+	              
+	       <table class="table table-borderless">
+    
+    <tbody>
+        <tr>
+        <td style=" padding: inherit;">  <label class="mb-2 mr-sm-2">วันที่บันทึก</label>
+        </td>
+        <td style=" padding: inherit;"> <input type="date" class="form-control mb-2 mr-sm-2" data-date-language="th" id="dateTimes" name="dateTimes"> 
+        </td>
+	
+     
+      </tr>
+	      <tr>
+        <td style=" padding: inherit;">   <label class="mb-2 mr-sm-2">พื้นที่:</label>
+       
+        </td>
+        <td style="padding: inherit;padding-bottom: 1%;"> 
+		<select name="cars" class="custom-select mb-3 mb-2 mr-sm-2" style="margin-bottom: 0rem!important;" id="locationArea" name="locationArea" >
+			 <option  value="0">เลือก พื้นที่</option>
+                  <option  value="1">สนง.ใหญ่</option>
+                <option value="2">เทรดดิ้ง</option>
+		    <option value="3">นอลแอล</option>  
+		     <option value="4">สารสนเทศ</option> 
+                <option value="5">สโมสร1</option>
+		     <option value="6">มิวเชียม</option>
+                <option value="7">อาคารคุณอิสระ</option>
+                <option value="8">แล็ป</option> 
+		  <option value="9">วางแผน</option>
+                <option value="10">การตลาดริมน้ำ</option>     
+		    <option value="11">19 ลิตร</option> 
+		    <option value="12">สโมสร2</option> 
+		    <option value="13">อู่คุณต๋อย</option> 
+		    <option value="14">อู่คุณจ๊ะ</option> 
+		    <option value="15">สามเสน</option> 
+		    <option value="16">สโตร์</option> 
+		    <option value="17">สนง.แพทย์</option> 
+		    <option value="18">บุคคล</option> 
+		    <option value="19">วิศวกรรม 1</option> 
+		    <option value="20">วิศวกรรม 2</option> 
+		    <option value="21">วิศวกรรม 3</option> 
+		    <option value="22">ออกแบบ</option> 
+		     <option value="23">อู่เทา</option> 
+              </select>
+        </td>
+     
+      </tr>
+     
+      <tr>
+          <td >  <label>1. ขยะฝังกลบ</label><br/>
+          <img  type="button" src="./img/PST.png" class="rounded" alt="Cinque Terre" width="80" height="80" data-toggle="modal" data-target="#myModal"> 
+          <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">LDPE</button> -->
+          <div class="form-inline">
+              
+              <input class="form-control " type="number" id="general" name="general" value="" style=" width: 50%;background-color: #4FC4DE;color: white" readonly> 
+              <input class="form-control " type="number" id="generalCorrect" name="generalCorrect" value="" style=" width: 50%;background-color: #C5C100;color: white" readonly>
+              <input class="form-control " type="number" id="generalCorrectx" name="generalCorrectx" value="" style=" width: 50%;background-color: coral;color: white" readonly>
+          </div>
+         
+          </td>
+          <td>  <label >2. ขวดพลาสติก PET</label> <br/>
+          <img   type="button" src="./img/PET.png" class="rounded" alt="Cinque Terre" width="80" height="80" data-toggle="modal" data-target="#myModal2"> <br/>
+          <div class="form-inline">
+              <input class="form-control " type="number" id="pet" name="pet" value="" style=" width: 50%;background-color: #4FC4DE;color: white" readonly> 
+              <input class="form-control " type="number" id="petCorrect" name="petCorrect" value="" style=" width: 50%;background-color: #C5C100;color: white" readonly>
+              <input class="form-control " type="number" id="petCorrectx" name="petCorrectx" value="" style=" width: 50%;background-color: coral;color: white" readonly>
+          </div>
+         
+           
+          </td>
+       
+        </tr>
+        <tr>
+            <td >  <label>3. พลาสติกยืด LDPE</label><br/>
+              <img  type="button" src="./img/PST.png" class="rounded" alt="Cinque Terre" width="80" height="80" data-toggle="modal" data-target="#myModal3"> 
+              <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">LDPE</button> -->
+              <div class="form-inline">
+                  
+                  <input class="form-control " type="number" id="ldpe" name="ldpe" value="" style=" width: 50%;background-color: #4FC4DE;color: white" readonly> 
+                  <input class="form-control " type="number" id="ldpeCorrect" name="ldpeCorrect" value="" style=" width: 50%;background-color: #C5C100;color: white" readonly>
+                  <input class="form-control " type="number" id="ldpeCorrectx" name="ldpeCorrectx" value="" style=" width: 50%;background-color: coral;color: white" readonly>
+              </div>
+             
+              </td>
+          <td> <label >4. พลาสติกแข็ง HDPE</label><br/>
+          <img   type="button" src="./img/HDPE.png" class="rounded" alt="Cinque Terre" width="80" height="80" data-toggle="modal" data-target="#myModal4"> <br/>
+          <div class="form-inline">
+              <input class="form-control " type="number" id="hdpe" name="hdpe" value="" style=" width: 50%;background-color: #4FC4DE;color: white" readonly> 
+              <input class="form-control " type="number" id="hdpeCorrect" name="hdpeCorrect" value="" style=" width: 50%;background-color: #C5C100;color: white" readonly>
+              <input class="form-control " type="number" id="hdpeCorrectx" name="hdpeCorrectx" value="" style=" width: 50%;background-color: coral;color: white" readonly>
+          </div>
+         
+            
+          </td>
+         
+       
+        </tr>
+        <tr>
+          
+          <td> <label >5. กระดาษ Paper</label><br/>
+            <img   type="button" src="./img/PAPER.png" class="rounded" alt="Cinque Terre" width="80" height="80" data-toggle="modal" data-target="#myModal5"> <br/>
+            <div class="form-inline">
+                <input class="form-control " type="number" id="paper" name="paper" value="" style=" width: 50%;background-color: #4FC4DE;color: white" readonly> 
+                <input class="form-control " type="number" id="paperCorrect" name="paperCorrect" value="" style=" width: 50%;background-color: #C5C100;color: white" readonly>
+                <input class="form-control " type="number" id="paperCorrectx" name="paperCorrectx" value="" style=" width: 50%;background-color: coral;color: white" readonly>
+            </div>
+             
+            </td>
+          <td> <label >6. ขวดแก้ว Glass</label><br/>
+          <img  type="button" src="./img/GLASS.png" class="rounded" alt="Cinque Terre" width="80" height="80" data-toggle="modal" data-target="#myModal6"> <br/>
+          <div class="form-inline">
+              <input class="form-control " type="number" id="glass" name="glass" value="" style=" width: 50%;background-color: #4FC4DE;color: white" readonly> 
+              <input class="form-control " type="number" id="glassCorrect" name="glassCorrect" value="" style=" width: 50%;background-color: #C5C100;color: white" readonly>
+              <input class="form-control " type="number" id="glassCorrectx" name="glassCorrectx" value="" style=" width: 50%;background-color: coral;color: white" readonly>
+          </div>
+           
+          </td>
+          
+        </tr>
+         <tr>
+            <td> <label >7. อะลูมิเนียม/โลหะ</label><br/>
+              <img  type="button" src="./img/METAL.png" class="rounded" alt="Cinque Terre" width="80" height="80" data-toggle="modal" data-target="#myModal7"> <br/>
+              <div class="form-inline">
+                  <input class="form-control " type="number" id="au" name="au" value="" style=" width: 50%;background-color: #4FC4DE;color: white" readonly> 
+                  <input class="form-control " type="number" id="auCorrect" name="auCorrect" value="" style=" width: 50%;background-color: #C5C100;color: white" readonly>
+                  <input class="form-control " type="number" id="auCorrectx" name="auCorrectx" value="" style=" width: 50%;background-color: coral;color: white" readonly>
+              </div>
+              
+              </td>
+          <td> <label >8. วัสดุเชื้อเพลิง N15</label><br/>
+          <img   type="button" src="./img/N15.png" class="rounded" alt="Cinque Terre" width="80" height="80" data-toggle="modal" data-target="#myModal8"> <br/>
+          <div class="form-inline">
+              <input class="form-control " type="number" id="n15" name="n15" value="" style=" width: 50%;background-color: #4FC4DE;color: white" readonly> 
+              <input class="form-control " type="number" id="n15Correct" name="n15Correct" value="" style=" width: 50%;background-color: #C5C100;color: white" readonly>
+              <input class="form-control " type="number" id="n15Correctx" name="n15Correctx" value="" style=" width: 50%;background-color: coral;color: white" readonly>
+          </div>
+          
+          </td>
+         
+          
+        </tr>
+        <tr>
+            <td> <label >9. เศษอาหาร </label><br/>
+              <img  type="button" src="./img/FOODWASTE.png" class="rounded" alt="Cinque Terre" width="80" height="80" data-toggle="modal" data-target="#myModal9"> <br/>
+              <div class="form-inline">
+                  <input class="form-control " type="number" id="foodWaste" name="foodWaste" value="" style=" width: 50%;background-color: #4FC4DE;color: white" readonly> 
+                  <input class="form-control " type="number" id="foodWasteCorrect" name="foodWasteCorrect" value="" style=" width: 50%;background-color: #C5C100;color: white" readonly>
+                  <input class="form-control " type="number" id="foodWasteCorrectx" name="foodWasteCorrectx" value="" style=" width: 50%;background-color: coral;color: white" readonly>
+              </div>
+                
+              </td>
+         
+          <td> <label >10. ขยะอิเล็กโทรนิก </label><br/>
+          <img  type="button" src="./img/FOODWASTE.png" class="rounded" alt="Cinque Terre" width="80" height="80" data-toggle="modal" data-target="#myModal10"> <br/>
+          <div class="form-inline">
+              <input class="form-control " type="number" id="elect" name="elect" value="" style=" width: 50%;background-color: #4FC4DE;color: white" readonly> 
+              <input class="form-control " type="number" id="electCorrect" name="electCorrect" value="" style=" width: 50%;background-color: #C5C100;color: white" readonly>
+              <input class="form-control " type="number" id="electCorrectx" name="electCorrectx" value="" style=" width: 50%;background-color: coral;color: white" readonly>
+          </div>
+            
+          </td>
+          
+        </tr>
+        <tr>
+          <td> <label >11. ขยะติดเชื้อ</label><br/>
+          <img   type="button" src="./img/N15.png" class="rounded" alt="Cinque Terre" width="80" height="80" data-toggle="modal" data-target="#myModal11"> <br/>
+          <div class="form-inline">
+              <input class="form-control " type="number" id="infectious" name="infectious" value="" style=" width: 50%;background-color: #4FC4DE;color: white" readonly> 
+              <input class="form-control " type="number" id="infectiousCorrect" name="infectiousCorrect" value="" style=" width: 50%;background-color: #C5C100;color: white" readonly>
+              <input class="form-control " type="number" id="infectiousCorrectx" name="infectiousCorrectx" value="" style=" width: 50%;background-color: coral;color: white" readonly>
+          </div>
+          
+          </td>
+          <td> <label >12. ขยะอันตราย </label><br/>
+          <img  type="button" src="./img/FOODWASTE.png" class="rounded" alt="Cinque Terre" width="80" height="80" data-toggle="modal" data-target="#myModal12"> <br/>
+          <div class="form-inline">
+              <input class="form-control " type="number" id="hazard" name="hazard" value="" style=" width: 50%;background-color: #4FC4DE;color: white" readonly> 
+              <input class="form-control " type="number" id="hazardCorrect" name="hazardCorrect" value="" style=" width: 50%;background-color: #C5C100;color: white" readonly>
+              <input class="form-control " type="number" id="hazardCorrectx" name="hazardCorrectx" value="" style=" width: 50%;background-color: coral;color: white" readonly>
+          </div>
+            
+          </td>
+          
+        </tr>
+    </tbody>
+  </table>
+  
+
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <!-- <h4 class="modal-title">Modal Header</h4> -->
+        </div>
+        <div class="modal-body">
+          <p>Some text in the modal.</p>
+      
+         <table class="table">
+    <thead>
+      <tr>
+        <th>ลำดับ</th>
+       
+        <th>ขยะฝังกลบ</th>
+        <th>เผาทิ้ง</th>
+        <th>ขยะรีไซเคิล</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+       
+        <td> <input class="form-control calc" type="number" id="generalNo1x" name="generalNo1x" value="" placeholder="0.00" step="0.01" > </td>
+        <td> <input class="form-control calcx" type="number" id="generalNo1y" name="generalNo1y" value="" placeholder="0.00" step="0.01" > </td>
+        <td> <input class="form-control calcCor" type="number" id="generalNo1" name="generalo1" value="" placeholder="0.00" step="0.01"> </td>
+      </tr>
+      <tr>
+        <td>2</td>
+       
+        <td> <input class="form-control calc" type="number" id="generalNo2x" name="generalNo2x" value="" placeholder="0.00" step="0.01" > </td>
+        <td> <input class="form-control calcx" type="number" id="generalNo2y" name="generalNo2y" value="" placeholder="0.00" step="0.01" > </td>
+        <td> <input class="form-control calcCor" type="number" id="generalNo2" name="generalNo2" value="" placeholder="0.00" step="0.01"> </td>
+      </tr>
+      <tr>
+        <td>3</td>
+       
+        <td> <input class="form-control calc" type="number" id="generalNo3x" name="generalNo3x" value="" placeholder="0.00" step="0.01" > </td>
+        <td> <input class="form-control calcx" type="number" id="generalNo3y" name="generalNo3y" value="" placeholder="0.00" step="0.01" > </td>
+        <td> <input class="form-control calcCor" type="number" id="generalNo3" name="generalNo3" value="" placeholder="0.00" step="0.01"> </td>
+      </tr>
+       <tr>
+          <td>4</td>
+         
+        <td> <input class="form-control calc" type="number" id="generalNo4x" name="generalNo4x" value="" placeholder="0.00" step="0.01" > </td>
+        <td> <input class="form-control calcx" type="number" id="generalNo4y" name="generalNo4y" value="" placeholder="0.00" step="0.01" > </td>
+        <td> <input class="form-control calcCor" type="number" id="generalNo4" name="generalNo4" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        <tr>
+            <td>5</td>
+           
+        <td> <input class="form-control calc" type="number" id="generalNo5x" name="generalNo5x" value="" placeholder="0.00" step="0.01" > </td>
+        <td> <input class="form-control calcx" type="number" id="generalNo5y" name="generalNo5y" value="" placeholder="0.00" step="0.01" > </td>
+        <td> <input class="form-control calcCor" type="number" id="generalNo5" name="generalNo5" value="" placeholder="0.00" step="0.01"> </td>
+          </tr>
+          <tr>
+              <td>6</td>
+              <td> <input class="form-control calc" type="number" id="generalNo6x" name="generalNo6x" value="" placeholder="0.00" step="0.01" > </td>
+              <td> <input class="form-control calcx" type="number" id="generalNo6y" name="generalNo6y" value="" placeholder="0.00" step="0.01" > </td>
+              <td> <input class="form-control calcCor" type="number" id="generalNo6" name="generalNo6" value="" placeholder="0.00" step="0.01"> </td>
+              
+              </tr>
+              <tr>
+              <td>7</td>
+              <td> <input class="form-control calc" type="number" id="generalNo7x" name="generalNo7x" value="" placeholder="0.00" step="0.01" > </td>
+              <td> <input class="form-control calcx" type="number" id="generalNo7y" name="generalNo7y" value="" placeholder="0.00" step="0.01" > </td>
+              <td> <input class="form-control calcCor" type="number" id="generalNo7" name="generalNo7" value="" placeholder="0.00" step="0.01"> </td>
+              
+              </tr>
+              <tr>
+              <td>8</td>
+              <td> <input class="form-control calc" type="number" id="generalNo8x" name="generalNo8x" value="" placeholder="0.00" step="0.01" > </td>
+              <td> <input class="form-control calcx" type="number" id="generalNo8y" name="generalNo8y" value="" placeholder="0.00" step="0.01" > </td>
+              <td> <input class="form-control calcCor" type="number" id="generalNo8" name="generalNo8" value="" placeholder="0.00" step="0.01"> </td>
+             
+              </tr>
+              <tr>
+              <td>9</td>
+              <td> <input class="form-control calc" type="number" id="generalNo9x" name="generalNo9x" value="" placeholder="0.00" step="0.01" > </td>
+              <td> <input class="form-control calcx" type="number" id="generalNo9y" name="generalNo9y" value="" placeholder="0.00" step="0.01" > </td>
+              <td> <input class="form-control calcCor" type="number" id="generalNo9" name="generalNo9" value="" placeholder="0.00" step="0.01"> </td>
+             
+              </tr>
+              <tr>
+              <td>10</td>
+              <td> <input class="form-control calc" type="number" id="generalNo10x" name="generalNo10x" value="" placeholder="0.00" step="0.01" > </td>
+              <td> <input class="form-control calcx" type="number" id="generalNo10y" name="generalNo10y" value="" placeholder="0.00" step="0.01" > </td>
+              <td> <input class="form-control calcCor" type="number" id="generalNo10" name="generalNo10" value="" placeholder="0.00" step="0.01"> </td>
+             
+              </tr>
+         
+    </tbody>
+  </table>
+  <div class="form-inline">
+    <Label>รวม</Label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      
+      <input class="form-control" type="text" id="totalScoreNot" name="totalScoreNot" value="" style="width: 20%;background-color: #C5C100;color: white" readonly>&nbsp;&nbsp;&nbsp;
+      <input class="form-control" type="text" id="totalScoreNotx" name="totalScoreNotx" value="" style="width: 20%;background-color: coral;color: white" readonly>&nbsp;&nbsp;&nbsp;
+      <input class="form-control" type="text" id="totalScoreCor" name="totalScoreCor" value="" style="width: 20%;background-color: #4FC4DE;color: white"  readonly>&nbsp;
+      <button type="button" class="btn btn-info" data-dismiss="modal">OK</button>
+  </div>
+  <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">OK</button> -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  <!-- End Modal -->
+ 
+   <!-- Modal -->
+   <div class="modal fade" id="myModal2" role="dialog">
+      <div class="modal-dialog">
+      
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <!-- <h4 class="modal-title">Modal Header</h4> -->
+          </div>
+          <div class="modal-body">
+            <p>Some text in the modal.</p>
+        
+           <table class="table">
+      <thead>
+        <tr>
+          <th>ลำดับ</th>
+          <th>ขยะรีไซเคิล</th>
+          <th>ขยะฝังกลบ</th>
+          <th>เผาทิ้ง</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td> <input class="form-control calcCor2" type="number" id="petNo1" name="petNo1" value="" placeholder="0.00" step="0.01"> </td>
+          <td> <input class="form-control calc2" type="number" id="petNo1x" name="petNo1x" value="" placeholder="0.00" step="0.01" > </td>
+          <td> <input class="form-control calc2x" type="number" id="petNo1y" name="petNo1y" value="" placeholder="0.00" step="0.01" > </td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><input class="form-control calcCor2" type="number" id="petNo2" name="petNo2" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc2" type="number" id="petNo2x" name="petNo2x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc2x" type="number" id="petNo2y" name="petNo2y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><input class="form-control calcCor2" type="number" id="petNo3" name="petNo3" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc2" type="number" id="petNo3x" name="petNo3x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc2x" type="number" id="petNo3y" name="petNo3y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+         <tr>
+            <td>4</td>
+            <td><input class="form-control calcCor2" type="number" id="petNo4" name="petNo4" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc2" type="number" id="petNo4x" name="petNo4x" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc2x" type="number" id="petNo4y" name="petNo4y" value="" placeholder="0.00" step="0.01"> </td>
+          </tr>
+          <tr>
+              <td>5</td>
+              <td><input class="form-control calcCor2" type="number" id="petNo5" name="petNo5" value="" placeholder="0.00" step="0.01"> </td>
+              <td><input class="form-control calc2" type="number" id="petNo5x" name="petNo5x" value="" placeholder="0.00" step="0.01"> </td>
+              <td><input class="form-control calc2x" type="number" id="petNo5y" name="petNo5y" value="" placeholder="0.00" step="0.01"> </td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td> <input class="form-control calcCor2" type="number" id="petNo6" name="petNo6" value="" placeholder="0.00" step="0.01"> </td>
+                <td> <input class="form-control calc2" type="number" id="petNo6x" name="petNo6x" value="" placeholder="0.00" step="0.01" > </td>
+                <td> <input class="form-control calc2x" type="number" id="petNo6y" name="petNo6y" value="" placeholder="0.00" step="0.01" > </td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td><input class="form-control calcCor2" type="number" id="petNo7" name="petNo7" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc2" type="number" id="petNo7x" name="petNo7x" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc2x" type="number" id="petNo7y" name="petNo7y" value="" placeholder="0.00" step="0.01"> </td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td><input class="form-control calcCor2" type="number" id="petNo8" name="petNo8" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc2" type="number" id="petNo8x" name="petNo8x" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc2x" type="number" id="petNo8y" name="petNo8y" value="" placeholder="0.00" step="0.01"> </td>
+              </tr>
+               <tr>
+                  <td>9</td>
+                  <td><input class="form-control calcCor2" type="number" id="petNo9" name="petNo9" value="" placeholder="0.00" step="0.01"> </td>
+                  <td><input class="form-control calc2" type="number" id="petNo9x" name="petNo9x" value="" placeholder="0.00" step="0.01"> </td>
+                  <td><input class="form-control calc2x" type="number" id="petNo9y" name="petNo9y" value="" placeholder="0.00" step="0.01"> </td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td><input class="form-control calcCor2" type="number" id="petNo10" name="petNo10" value="" placeholder="0.00" step="0.01"> </td>
+                    <td><input class="form-control calc2" type="number" id="petNo10x" name="petNo10x" value="" placeholder="0.00" step="0.01"> </td>
+                    <td><input class="form-control calc2x" type="number" id="petNo10y" name="petNo10y" value="" placeholder="0.00" step="0.01"> </td>
+                  </tr>
+           
+      </tbody>
+    </table>
+    <div class="form-inline">
+      <Label>รวม</Label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreCor2" name="totalScoreCor2" value="" style="width: 20%;background-color: #4FC4DE;color: white"  readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot2" name="totalScoreNot2" value="" style="width: 20%;background-color: #C5C100;color: white" readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot2x" name="totalScoreNot2x" value="" style="width: 20%;background-color: coral;color: white" readonly>&nbsp;
+        <button type="button" class="btn btn-info" data-dismiss="modal">OK</button>
+    </div>
+    <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">OK</button> -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    <!-- End Modal -->
+     <!-- Modal -->
+  <div class="modal fade" id="myModal3" role="dialog">
+      <div class="modal-dialog">
+      
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <!-- <h4 class="modal-title">Modal Header</h4> -->
+          </div>
+          <div class="modal-body">
+            <p>Some text in the modal.</p>
+        
+           <table class="table">
+      <thead>
+        <tr>
+          <th>ลำดับ</th>
+          <th>ขยะรีไซเคิล</th>
+          <th>ขยะฝังกลบ</th>
+          <th>เผาทิ้ง</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td> <input class="form-control calcCor3" type="number" id="ldpeNo1" name="ldpeNo1" value="" placeholder="0.00" step="0.01"> </td>
+          <td> <input class="form-control calc3" type="number" id="ldpeNo1x" name="ldpeNo1x" value="" placeholder="0.00" step="0.01" > </td>
+          <td> <input class="form-control calc3x" type="number" id="ldpeNo1y" name="ldpeNo1y" value="" placeholder="0.00" step="0.01" > </td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><input class="form-control calcCor3" type="number" id="ldpeNo2" name="ldpeNo2" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc3" type="number" id="ldpeNo2x" name="ldpeNo2x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc3x" type="number" id="ldpeNo2y" name="ldpeNo2y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><input class="form-control calcCor3" type="number" id="ldpeNo3" name="ldpeNo3" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc3" type="number" id="ldpeNo3x" name="ldpeNo3x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc3x" type="number" id="ldpeNo3y" name="ldpeNo3y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+         <tr>
+            <td>4</td>
+            <td><input class="form-control calcCor3" type="number" id="ldpeNo4" name="ldpeNo4" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc3" type="number" id="ldpeNo4x" name="ldpeNo4x" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc3x" type="number" id="ldpeNo4y" name="ldpeNo4y" value="" placeholder="0.00" step="0.01"> </td>
+          </tr>
+          <tr>
+              <td>5</td>
+              <td><input class="form-control calcCor3" type="number" id="ldpeNo5" name="ldpeNo5" value="" placeholder="0.00" step="0.01"> </td>
+              <td><input class="form-control calc3" type="number" id="ldpeNo5x" name="ldpeNo5x" value="" placeholder="0.00" step="0.01"> </td>
+              <td><input class="form-control calc3x" type="number" id="ldpeNo5y" name="ldpeNo5y" value="" placeholder="0.00" step="0.01"> </td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td> <input class="form-control calcCor3" type="number" id="ldpeNo6" name="ldpeNo6" value="" placeholder="0.00" step="0.01"> </td>
+                <td> <input class="form-control calc3" type="number" id="ldpeNo6x" name="ldpeNo6x" value="" placeholder="0.00" step="0.01" > </td>
+                <td> <input class="form-control calc3x" type="number" id="ldpeNo6y" name="ldpeNo6y" value="" placeholder="0.00" step="0.01" > </td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td><input class="form-control calcCor3" type="number" id="ldpeNo7" name="ldpeNo7" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc3" type="number" id="ldpeNo7x" name="ldpeNo7x" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc3x" type="number" id="ldpeNo7y" name="ldpeNo7y" value="" placeholder="0.00" step="0.01"> </td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td><input class="form-control calcCor3" type="number" id="ldpeNo8" name="ldpeNo8" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc3" type="number" id="ldpeNo8x" name="ldpeNo8x" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc3x" type="number" id="ldpeNo8y" name="ldpeNo8y" value="" placeholder="0.00" step="0.01"> </td>
+              </tr>
+               <tr>
+                  <td>9</td>
+                  <td><input class="form-control calcCor3" type="number" id="ldpeNo9" name="ldpeNo9" value="" placeholder="0.00" step="0.01"> </td>
+                  <td><input class="form-control calc3" type="number" id="ldpeNo9x" name="ldpeNo9x" value="" placeholder="0.00" step="0.01"> </td>
+                  <td><input class="form-control calc3x" type="number" id="ldpeNo9y" name="ldpeNo9y" value="" placeholder="0.00" step="0.01"> </td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td><input class="form-control calcCor3" type="number" id="ldpeNo10" name="ldpeNo10" value="" placeholder="0.00" step="0.01"> </td>
+                    <td><input class="form-control calc3" type="number" id="ldpeNo10x" name="ldpeNo10x" value="" placeholder="0.00" step="0.01"> </td>
+                    <td><input class="form-control calc3x" type="number" id="ldpeNo10y" name="ldpeNo10y" value="" placeholder="0.00" step="0.01"> </td>
+                  </tr>
+           
+      </tbody>
+    </table>
+    <div class="form-inline">
+      <Label>รวม</Label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreCor3" name="totalScoreCor3" value="" style="width: 20%;background-color: #4FC4DE;color: white"  readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot3" name="totalScoreNot3" value="" style="width: 20%;background-color: #C5C100;color: white" readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot3x" name="totalScoreNot3x" value="" style="width: 20%;background-color: coral;color: white" readonly>&nbsp;
+        <button type="button" class="btn btn-info" data-dismiss="modal">OK</button>
+    </div>
+    <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">OK</button> -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    <!-- End Modal -->
+     <!-- Modal -->
+  <div class="modal fade" id="myModal4" role="dialog">
+      <div class="modal-dialog">
+      
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <!-- <h4 class="modal-title">Modal Header</h4> -->
+          </div>
+          <div class="modal-body">
+            <p>Some text in the modal.</p>
+        
+           <table class="table">
+      <thead>
+        <tr>
+          <th>ลำดับ</th>
+          <th>ขยะรีไซเคิล</th>
+          <th>ขยะฝังกลบ</th>
+          <th>เผาทิ้ง</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td> <input class="form-control calcCor4" type="number" id="hdpeNo1" name="hdpeNo1" value="" placeholder="0.00" step="0.01"> </td>
+          <td> <input class="form-control calc4" type="number" id="hdpeNo1x" name="hdpeNo1x" value="" placeholder="0.00" step="0.01" > </td>
+          <td> <input class="form-control calc4x" type="number" id="hdpeNo1y" name="hdpeNo1y" value="" placeholder="0.00" step="0.01" > </td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><input class="form-control calcCor4" type="number" id="hdpeNo2" name="hdpeNo2" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc4" type="number" id="hdpeNo2x" name="hdpeNo2x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc4x" type="number" id="hdpeNo2y" name="hdpeNo2y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><input class="form-control calcCor4" type="number" id="hdpeNo3" name="hdpeNo3" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc4" type="number" id="hdpeNo3x" name="hdpeNo3x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc4x" type="number" id="hdpeNo3y" name="hdpeNo3y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+         <tr>
+            <td>4</td>
+            <td><input class="form-control calcCor4" type="number" id="hdpeNo4" name="hdpeNo4" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc4" type="number" id="hdpeNo4x" name="hdpeNo4x" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc4x" type="number" id="hdpeNo4y" name="hdpeNo4y" value="" placeholder="0.00" step="0.01"> </td>
+          </tr>
+          <tr>
+              <td>5</td>
+              <td><input class="form-control calcCor4" type="number" id="hdpeNo5" name="hdpeNo5" value="" placeholder="0.00" step="0.01"> </td>
+              <td><input class="form-control calc4" type="number" id="hdpeNo5x" name="hdpeNo5x" value="" placeholder="0.00" step="0.01"> </td>
+              <td><input class="form-control calc4x" type="number" id="hdpeNo5y" name="hdpeNo5y" value="" placeholder="0.00" step="0.01"> </td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td> <input class="form-control calcCor4" type="number" id="hdpeNo6" name="hdpeNo6" value="" placeholder="0.00" step="0.01"> </td>
+                <td> <input class="form-control calc4" type="number" id="hdpeNo6x" name="hdpeNo6x" value="" placeholder="0.00" step="0.01" > </td>
+                <td> <input class="form-control calc4x" type="number" id="hdpeNo6y" name="hdpeNo6y" value="" placeholder="0.00" step="0.01" > </td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td><input class="form-control calcCor4" type="number" id="hdpeNo7" name="hdpeNo7" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc4" type="number" id="hdpeNo7x" name="hdpeNo7x" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc4x" type="number" id="hdpeNo7y" name="hdpeNo7y" value="" placeholder="0.00" step="0.01"> </td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td><input class="form-control calcCor4" type="number" id="hdpeNo8" name="hdpeNo8" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc4" type="number" id="hdpeNo8x" name="hdpeNo8x" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc4x" type="number" id="hdpeNo8y" name="hdpeNo8y" value="" placeholder="0.00" step="0.01"> </td>
+              </tr>
+               <tr>
+                  <td>9</td>
+                  <td><input class="form-control calcCor4" type="number" id="hdpeNo9" name="hdpeNo9" value="" placeholder="0.00" step="0.01"> </td>
+                  <td><input class="form-control calc4" type="number" id="hdpeNo9x" name="hdpeNo9x" value="" placeholder="0.00" step="0.01"> </td>
+                  <td><input class="form-control calc4x" type="number" id="hdpeNo9y" name="hdpeNo9y" value="" placeholder="0.00" step="0.01"> </td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td><input class="form-control calcCor4" type="number" id="hdpeNo10" name="hdpeNo10" value="" placeholder="0.00" step="0.01"> </td>
+                    <td><input class="form-control calc4" type="number" id="hdpeNo10x" name="hdpeNo10x" value="" placeholder="0.00" step="0.01"> </td>
+                    <td><input class="form-control calc4x" type="number" id="hdpeNo10y" name="hdpeNo10y" value="" placeholder="0.00" step="0.01"> </td>
+                  </tr>
+           
+      </tbody>
+    </table>
+    <div class="form-inline">
+      <Label>รวม</Label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreCor4" name="totalScoreCor4" value="" style="width: 20%;background-color: #4FC4DE;color: white"  readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot4" name="totalScoreNot4" value="" style="width: 20%;background-color: #C5C100;color: white" readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot4x" name="totalScoreNot4x" value="" style="width: 20%;background-color: coral;color: white" readonly>&nbsp;
+        <button type="button" class="btn  btn-info" data-dismiss="modal">OK</button>
+    </div>
+    <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">OK</button> -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    <!-- End Modal -->
+     <!-- Modal -->
+  <div class="modal fade" id="myModal5" role="dialog">
+      <div class="modal-dialog">
+      
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <!-- <h4 class="modal-title">Modal Header</h4> -->
+          </div>
+          <div class="modal-body">
+            <p>Some text in the modal.</p>
+        
+           <table class="table">
+      <thead>
+        <tr>
+          <th>ลำดับ</th>
+          <th>ขยะรีไซเคิล</th>
+          <th>ขยะฝังกลบ</th>
+          <th>เผาทิ้ง</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td> <input class="form-control calcCor5" type="number" id="paperNo1" name="paperNo1" value="" placeholder="0.00" step="0.01"> </td>
+          <td> <input class="form-control calc5" type="number" id="paperNo1x" name="paperNo1x" value="" placeholder="0.00" step="0.01" > </td>
+          <td><input class="form-control calc5x" type="number" id="paperNo1y" name="paperNo1y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><input class="form-control calcCor5" type="number" id="paperNo2" name="paperNo2" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc5" type="number" id="paperNo2x" name="paperNo2x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc5x" type="number" id="paperNo2y" name="paperNo2y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><input class="form-control calcCor5" type="number" id="paperNo3" name="paperNo3" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc5" type="number" id="paperNo3x" name="paperNo3x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc5x" type="number" id="paperNo3y" name="paperNo3y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+         <tr>
+            <td>4</td>
+            <td><input class="form-control calcCor5" type="number" id="paperNo4" name="paperNo4" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc5" type="number" id="paperNo4x" name="paperNo4x" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc5x" type="number" id="paperNo4y" name="paperNo4y" value="" placeholder="0.00" step="0.01"> </td>
+          </tr>
+          <tr>
+              <td>5</td>
+              <td><input class="form-control calcCor5" type="number" id="paperNo5" name="paperNo5" value="" placeholder="0.00" step="0.01"> </td>
+              <td><input class="form-control calc5" type="number" id="paperNo5x" name="paperNo5x" value="" placeholder="0.00" step="0.01"> </td>
+              <td><input class="form-control calc5x" type="number" id="paperNo5y" name="paperNo5y" value="" placeholder="0.00" step="0.01"> </td>
+            </tr>
+           
+              <tr>
+                      <td>6</td>
+                      <td> <input class="form-control calcCor5" type="number" id="paperNo6" name="paperNo6" value="" placeholder="0.00" step="0.01"> </td>
+                      <td> <input class="form-control calc5" type="number" id="paperNo6x" name="paperNo6x" value="" placeholder="0.00" step="0.01" > </td>
+                      <td><input class="form-control calc5x" type="number" id="paperNo6y" name="paperNo6y" value="" placeholder="0.00" step="0.01"> </td>
+                    </tr>
+                    <tr>
+                      <td>7</td>
+                      <td><input class="form-control calcCor5" type="number" id="paperNo7" name="paperNo7" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc5" type="number" id="paperNo7x" name="paperNo7x" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc5x" type="number" id="paperNo7y" name="paperNo7y" value="" placeholder="0.00" step="0.01"> </td>
+                    </tr>
+                    <tr>
+                      <td>8</td>
+                      <td><input class="form-control calcCor5" type="number" id="paperNo8" name="paperNo8" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc5" type="number" id="paperNo8x" name="paperNo8x" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc5x" type="number" id="paperNo8y" name="paperNo8y" value="" placeholder="0.00" step="0.01"> </td>
+                    </tr>
+                     <tr>
+                        <td>9</td>
+                        <td><input class="form-control calcCor5" type="number" id="paperNo9" name="paperNo9" value="" placeholder="0.00" step="0.01"> </td>
+                        <td><input class="form-control calc5" type="number" id="paperNo9x" name="paperNo9x" value="" placeholder="0.00" step="0.01"> </td>
+                        <td><input class="form-control calc5x" type="number" id="paperNo9y" name="paperNo9y" value="" placeholder="0.00" step="0.01"> </td>
+                      </tr>
+                      <tr>
+                          <td>10</td>
+                          <td><input class="form-control calcCor5" type="number" id="paperNo10" name="paperNo10" value="" placeholder="0.00" step="0.01"> </td>
+                          <td><input class="form-control calc5" type="number" id="paperNo10x" name="paperNo10x" value="" placeholder="0.00" step="0.01"> </td>
+                          <td><input class="form-control calc5x" type="number" id="paperNo10y" name="paperNo10y" value="" placeholder="0.00" step="0.01"> </td>
+                        </tr>
+           
+      </tbody>
+    </table>
+    <div class="form-inline">
+      <Label>รวม</Label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreCor5" name="totalScoreCor5" value="" style="width: 20%;background-color: #4FC4DE;color: white"  readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot5" name="totalScoreNot5" value="" style="width: 20%;background-color: #C5C100;color: white" readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot5x" name="totalScoreNot5x" value="" style="width: 20%;background-color: coral;color: white" readonly>&nbsp;
+        <button type="button" class="btn  btn-info" data-dismiss="modal">OK</button>
+    </div>
+    <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">OK</button> -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    <!-- End Modal -->
+     <!-- Modal -->
+  <div class="modal fade" id="myModal7" role="dialog">
+      <div class="modal-dialog">
+      
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <!-- <h4 class="modal-title">Modal Header</h4> -->
+          </div>
+          <div class="modal-body">
+            <p>Some text in the modal.</p>
+        
+           <table class="table">
+      <thead>
+        <tr>
+          <th>ลำดับ</th>
+          <th>ขยะรีไซเคิล</th>
+          <th>ขยะฝังกลบ</th>
+          <th>เผาทิ้ง</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td> <input class="form-control calcCor7" type="number" id="auNo1" name="auNo1" value="" placeholder="0.00" step="0.01"> </td>
+          <td> <input class="form-control calc7" type="number" id="auNo1x" name="auNo1x" value="" placeholder="0.00" step="0.01" > </td>
+          <td><input class="form-control calc7x" type="number" id="auNo1y" name="auNo1y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><input class="form-control calcCor7" type="number" id="auNo2" name="auNo2" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc7" type="number" id="auNo2x" name="auNo2x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc7x" type="number" id="auNo2y" name="auNo2y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><input class="form-control calcCor7" type="number" id="auNo3" name="auNo3" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc7" type="number" id="auNo3x" name="auNo3x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc7x" type="number" id="auNo3y" name="auNo3y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+         <tr>
+            <td>4</td>
+            <td><input class="form-control calcCor7" type="number" id="auNo4" name="auNo4" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc7" type="number" id="auNo4x" name="auNo4x" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc7x" type="number" id="auNo4y" name="auNo4y" value="" placeholder="0.00" step="0.01"> </td>
+          </tr>
+          <tr>
+              <td>5</td>
+              <td><input class="form-control calcCor7" type="number" id="auNo5" name="auNo5" value="" placeholder="0.00" step="0.01"> </td>
+              <td><input class="form-control calc7" type="number" id="auNo5x" name="auNo5x" value="" placeholder="0.00" step="0.01"> </td>
+              <td><input class="form-control calc7x" type="number" id="auNo5y" name="auNo5y" value="" placeholder="0.00" step="0.01"> </td>
+            </tr>
+            
+              <tr>
+                      <td>6</td>
+                      <td> <input class="form-control calcCor7" type="number" id="auNo6" name="auNo6" value="" placeholder="0.00" step="0.01"> </td>
+                      <td> <input class="form-control calc7" type="number" id="auNo6x" name="auNo6x" value="" placeholder="0.00" step="0.01" > </td>
+                      <td><input class="form-control calc7x" type="number" id="auNo6y" name="auNo6y" value="" placeholder="0.00" step="0.01"> </td>
+                    </tr>
+                    <tr>
+                      <td>7</td>
+                      <td><input class="form-control calcCor7" type="number" id="auNo7" name="auNo7" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc7" type="number" id="auNo7x" name="auNo7x" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc7x" type="number" id="auNo7y" name="auNo7y" value="" placeholder="0.00" step="0.01"> </td>
+                    </tr>
+                    <tr>
+                      <td>8</td>
+                      <td><input class="form-control calcCor7" type="number" id="auNo8" name="auNo8" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc7" type="number" id="auNo8x" name="auNo8x" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc7x" type="number" id="auNo8y" name="auNo8y" value="" placeholder="0.00" step="0.01"> </td>
+                    </tr>
+                     <tr>
+                        <td>9</td>
+                        <td><input class="form-control calcCor7" type="number" id="auNo9" name="auNo9" value="" placeholder="0.00" step="0.01"> </td>
+                        <td><input class="form-control calc7" type="number" id="auNo9x" name="auNo9x" value="" placeholder="0.00" step="0.01"> </td>
+                        <td><input class="form-control calc7x" type="number" id="auNo9y" name="auNo9y" value="" placeholder="0.00" step="0.01"> </td>
+                      </tr>
+                      <tr>
+                          <td>10</td>
+                          <td><input class="form-control calcCor7" type="number" id="auNo10" name="auNo10" value="" placeholder="0.00" step="0.01"> </td>
+                          <td><input class="form-control calc7" type="number" id="auNo10x" name="auNo10x" value="" placeholder="0.00" step="0.01"> </td>
+                          <td><input class="form-control calc7x" type="number" id="auNo10y" name="auNo10y" value="" placeholder="0.00" step="0.01"> </td>
+                        </tr>
+           
+      </tbody>
+    </table>
+    <div class="form-inline">
+      <Label>รวม</Label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreCor7" name="totalScoreCor7" value="" style="width: 20%;background-color: #4FC4DE;color: white"  readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot7" name="totalScoreNot7" value="" style="width: 20%;background-color: #C5C100;color: white" readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot7x" name="totalScoreNot7x" value="" style="width: 20%;background-color: coral;color: white" readonly>&nbsp;
+        <button type="button" class="btn  btn-info" data-dismiss="modal">OK</button>
+    </div>
+    <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">OK</button> -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    <!-- End Modal -->
+     <!-- Modal -->
+  <div class="modal fade" id="myModal6" role="dialog">
+      <div class="modal-dialog">
+      
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <!-- <h4 class="modal-title">Modal Header</h4> -->
+          </div>
+          <div class="modal-body">
+            <p>Some text in the modal.</p>
+        
+           <table class="table">
+      <thead>
+        <tr>
+          <th>ลำดับ</th>
+          <th>ขยะรีไซเคิล</th>
+          <th>ขยะฝังกลบ</th>
+          <th>เผาทิ้ง</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td> <input class="form-control calcCor6" type="number" id="glassNo1" name="glassNo1" value="" placeholder="0.00" step="0.01"> </td>
+          <td> <input class="form-control calc6" type="number" id="glassNo1x" name="glassNo1" value="" placeholder="0.00" step="0.01" > </td>
+          <td><input class="form-control calc6x" type="number" id="glassNo1y" name="glassNo1y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><input class="form-control calcCor6" type="number" id="glassNo2" name="glassNo2" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc6" type="number" id="glassNo2x" name="glassNo2x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc6x" type="number" id="glassNo2y" name="glassNo2y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><input class="form-control calcCor6" type="number" id="glassNo3" name="glassNo3" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc6" type="number" id="glassNo3x" name="glassNo3x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc6x" type="number" id="glassNo3y" name="glassNo3y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        </tr>
+         <tr>
+            <td>4</td>
+            <td><input class="form-control calcCor6" type="number" id="glassNo4" name="glassNo4" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc6" type="number" id="glassNo4x" name="glassNo4x" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc6x" type="number" id="glassNo4y" name="glassNo4y" value="" placeholder="0.00" step="0.01"> </td>
+          </tr>
+          </tr>
+          <tr>
+              <td>5</td>
+              <td><input class="form-control calcCor6" type="number" id="glassNo5" name="glassNo5" value="" placeholder="0.00" step="0.01"> </td>
+              <td><input class="form-control calc6" type="number" id="glassNo5x" name="glassNo5x" value="" placeholder="0.00" step="0.01"> </td>
+              <td><input class="form-control calc6x" type="number" id="glassNo5y" name="glassNo5y" value="" placeholder="0.00" step="0.01"> </td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td> <input class="form-control calcCor6" type="number" id="glassNo6" name="glassNo6" value="" placeholder="0.00" step="0.01"> </td>
+                <td> <input class="form-control calc6" type="number" id="glassNo6x" name="glassNo6" value="" placeholder="0.00" step="0.01" > </td>
+                <td><input class="form-control calc6x" type="number" id="glassNo6y" name="glassNo6y" value="" placeholder="0.00" step="0.01"> </td>
+              </tr>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td><input class="form-control calcCor6" type="number" id="glassNo7" name="glassNo7" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc6" type="number" id="glassNo7x" name="glassNo7x" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc6x" type="number" id="glassNo7y" name="glassNo7y" value="" placeholder="0.00" step="0.01"> </td>
+              </tr>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td><input class="form-control calcCor6" type="number" id="glassNo8" name="glassNo8" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc6" type="number" id="glassNo8x" name="glassNo8x" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc6x" type="number" id="glassNo8y" name="glassNo8y" value="" placeholder="0.00" step="0.01"> </td>
+              </tr>
+              </tr>
+               <tr>
+                  <td>9</td>
+                  <td><input class="form-control calcCor6" type="number" id="glassNo9" name="glassNo9" value="" placeholder="0.00" step="0.01"> </td>
+                  <td><input class="form-control calc6" type="number" id="glassNo9x" name="glassNo9x" value="" placeholder="0.00" step="0.01"> </td>
+                  <td><input class="form-control calc6x" type="number" id="glassNo9y" name="glassNo9y" value="" placeholder="0.00" step="0.01"> </td>
+                </tr>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td><input class="form-control calcCor6" type="number" id="glassNo10" name="glassNo10" value="" placeholder="0.00" step="0.01"> </td>
+                    <td><input class="form-control calc6" type="number" id="glassNo10x" name="glassNo10x" value="" placeholder="0.00" step="0.01"> </td>
+                    <td><input class="form-control calc6x" type="number" id="glassNo10y" name="glassNo10y" value="" placeholder="0.00" step="0.01"> </td>
+                  </tr>
+           
+      </tbody>
+    </table>
+    <div class="form-inline">
+      <Label>รวม</Label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreCor6" name="totalScoreCor6" value="" style="width: 20%;background-color: #4FC4DE;color: white"  readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot6" name="totalScoreNot6" value="" style="width: 20%;background-color: #C5C100;color: white" readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot6x" name="totalScoreNot6x" value="" style="width: 20%;background-color: coral;color: white" readonly>&nbsp;
+        <button type="button" class="btn  btn-info" data-dismiss="modal">OK</button>
+    </div>
+    <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">OK</button> -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    <!-- End Modal -->
+     <!-- Modal -->
+  <div class="modal fade" id="myModal8" role="dialog">
+      <div class="modal-dialog">
+      
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <!-- <h4 class="modal-title">Modal Header</h4> -->
+          </div>
+          <div class="modal-body">
+            <p>Some text in the modal.</p>
+        
+           <table class="table">
+      <thead>
+        <tr>
+          <th>ลำดับ</th>
+          <th>เผาทิ้ง</th>
+          <th>ขยะฝังกลบ</th>
+          
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><input class="form-control calc8x" type="number" id="n15No1y" name="n15No1y" value="" placeholder="0.00" step="0.01"> </td>
+         
+          <td> <input class="form-control calc8" type="number" id="n15No1x" name="n15No1x" value="" placeholder="0.00" step="0.01" > </td>
+         
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><input class="form-control calc8x" type="number" id="n15No2y" name="n15No2y" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc8" type="number" id="n15No2x" name="n15No2x" value="" placeholder="0.00" step="0.01"> </td>
+         
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><input class="form-control calc8x" type="number" id="n15No3y" name="n15No3y" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc8" type="number" id="n15No3x" name="n15No3x" value="" placeholder="0.00" step="0.01"> </td>
+         
+        </tr>
+         <tr>
+            <td>4</td>
+            <td><input class="form-control calc8x" type="number" id="n15No4y" name="n15No4y" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc8" type="number" id="n15No4x" name="n15No4x" value="" placeholder="0.00" step="0.01"> </td>
+           
+          </tr>
+          <tr>
+              <td>5</td>
+              <td><input class="form-control calc8x" type="number" id="n15No5y" name="n15No5y" value="" placeholder="0.00" step="0.01"> </td>
+              <td><input class="form-control calc8" type="number" id="n15No5x" name="n15No5x" value="" placeholder="0.00" step="0.01"> </td>
+              
+            </tr>
+            
+              <tr>
+                      <td>6</td>
+                      <td><input class="form-control calc8x" type="number" id="n15No6y" name="n15No6y" value="" placeholder="0.00" step="0.01"> </td>
+                      <td> <input class="form-control calc8" type="number" id="n15No6x" name="n15No6x" value="" placeholder="0.00" step="0.01" > </td>
+                    
+                    </tr>
+                    <tr>
+                      <td>7</td>
+                      <td><input class="form-control calc8x" type="number" id="n15No7y" name="n15No7y" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc8" type="number" id="n15No7x" name="n15No7x" value="" placeholder="0.00" step="0.01"> </td>
+                      
+                    </tr>
+                    <tr>
+                      <td>8</td>
+                      <td><input class="form-control calc8x" type="number" id="n15No8y" name="n15No8y" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc8" type="number" id="n15No8x" name="n15No8x" value="" placeholder="0.00" step="0.01"> </td>
+                      
+                    </tr>
+                     <tr>
+                        <td>9</td>
+                        <td><input class="form-control calc8x" type="number" id="n15No9y" name="n15No9y" value="" placeholder="0.00" step="0.01"> </td>
+                        <td><input class="form-control calc8" type="number" id="n15No9x" name="n15No9x" value="" placeholder="0.00" step="0.01"> </td>
+                        
+                      </tr>
+                      <tr>
+                          <td>10</td>
+                          <td><input class="form-control calc8x" type="number" id="n15No10y" name="n15No10y" value="" placeholder="0.00" step="0.01"> </td>
+                          <td><input class="form-control calc8" type="number" id="n15No10x" name="n15No10x" value="" placeholder="0.00" step="0.01"> </td>
+                         
+                        </tr>
+                       
+           
+      </tbody>
+    </table>
+    <div class="form-inline">
+      <Label>รวม</Label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input class="form-control " type="text" id="totalScoreCor8" name="totalScoreCor8" value="0" style="width: 20%;background-color: #4FC4DE;color: white;display: none;"  readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot8x" name="totalScoreNot8x" value="" style="width: 20%;background-color: coral;color: white" readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot8" name="totalScoreNot8" value="" style="width: 20%;background-color: #C5C100;color: white" readonly>&nbsp;&nbsp;&nbsp;
+       
+        <button type="button" class="btn  btn-info" data-dismiss="modal">OK</button>
+    </div>
+    <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">OK</button> -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    <!-- End Modal -->
+     <!-- Modal -->
+  <div class="modal fade" id="myModal9" role="dialog">
+      <div class="modal-dialog">
+      
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <!-- <h4 class="modal-title">Modal Header</h4> -->
+          </div>
+          <div class="modal-body">
+            <p>Some text in the modal.</p>
+        
+           <table class="table">
+      <thead>
+        <tr>
+            <th>ลำดับ</th>
+          <th>ทิ้งถูกต้อง</th>
+          <th>ขยะฝังกลบ</th>
+          <th>เผาทิ้ง</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td> <input class="form-control calcCor9" type="number" id="foodWasteNo1" name="foodWasteNo1" value="" placeholder="0.00" step="0.01"> </td>
+          <td> <input class="form-control calc9" type="number" id="foodWasteNo1x" name="foodWasteNo1x" value="" placeholder="0.00" step="0.01" > </td>
+          <td><input class="form-control calc9x" type="number" id="foodWasteNo1y" name="foodWasteNo1y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><input class="form-control calcCor9" type="number" id="foodWasteNo2" name="foodWasteNo2" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc9" type="number" id="foodWasteNo2x" name="foodWasteNo2x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc9x" type="number" id="foodWasteNo2y" name="foodWasteNo2y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><input class="form-control calcCor9" type="number" id="foodWasteNo3" name="foodWasteNo3" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc9" type="number" id="foodWasteNo3x" name="foodWasteNo3x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc9x" type="number" id="foodWasteNo3y" name="foodWasteNo3y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+         <tr>
+            <td>4</td>
+            <td><input class="form-control calcCor9" type="number" id="foodWasteNo4" name="foodWasteNo4" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc9" type="number" id="foodWasteNo4x" name="foodWasteNo4x" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc9x" type="number" id="foodWasteNo4y" name="foodWasteNo4y" value="" placeholder="0.00" step="0.01"> </td>
+          </tr>
+          <tr>
+              <td>5</td>
+              <td><input class="form-control calcCor9" type="number" id="foodWasteNo5" name="foodWasteNo5" value="" placeholder="0.00" step="0.01"> </td>
+              <td><input class="form-control calc9" type="number" id="foodWasteNo5x" name="foodWasteNo5x" value="" placeholder="0.00" step="0.01"> </td>
+             <td><input class="form-control calc9x" type="number" id="foodWasteNo5y" name="foodWasteNo5y" value="" placeholder="0.00" step="0.01"> </td>
+            </tr>
+           
+              <tr>
+                      <td>6</td>
+                      <td> <input class="form-control calcCor9" type="number" id="foodWasteNo6" name="foodWasteNo6" value="" placeholder="0.00" step="0.01"> </td>
+                      <td> <input class="form-control calc9" type="number" id="foodWasteNo6x" name="foodWasteNo6x" value="" placeholder="0.00" step="0.01" > </td>
+                      <td><input class="form-control calc9x" type="number" id="foodWasteNo6y" name="foodWasteNo6y" value="" placeholder="0.00" step="0.01"> </td>
+                    </tr>
+                    <tr>
+                      <td>7</td>
+                      <td><input class="form-control calcCor9" type="number" id="foodWasteNo7" name="foodWasteNo7" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc9" type="number" id="foodWasteNo7x" name="foodWasteNo7x" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc9x" type="number" id="foodWasteNo7y" name="foodWasteNo7y" value="" placeholder="0.00" step="0.01"> </td>
+                    </tr>
+                    <tr>
+                      <td>8</td>
+                      <td><input class="form-control calcCor9" type="number" id="foodWasteNo8" name="foodWasteNo8" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc9" type="number" id="foodWasteNo8x" name="foodWasteNo8x" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc9x" type="number" id="foodWasteNo8y" name="foodWasteNo8y" value="" placeholder="0.00" step="0.01"> </td>
+                    </tr>
+                     <tr>
+                        <td>9</td>
+                        <td><input class="form-control calcCor9" type="number" id="foodWasteNo9" name="foodWasteNo9" value="" placeholder="0.00" step="0.01"> </td>
+                        <td><input class="form-control calc9" type="number" id="foodWasteNo9x" name="foodWasteNo9x" value="" placeholder="0.00" step="0.01"> </td>
+                        <td><input class="form-control calc9x" type="number" id="foodWasteNo9y" name="foodWasteNo9y" value="" placeholder="0.00" step="0.01"> </td>
+                      </tr>
+                      <tr>
+                          <td>10</td>
+                          <td><input class="form-control calcCor9" type="number" id="foodWasteNo10" name="foodWasteNo10" value="" placeholder="0.00" step="0.01"> </td>
+                          <td><input class="form-control calc9" type="number" id="foodWasteNo10x" name="foodWasteNo10x" value="" placeholder="0.00" step="0.01"> </td>
+                         <td><input class="form-control calc9x" type="number" id="foodWasteNo10y" name="foodWasteNo10y" value="" placeholder="0.00" step="0.01"> </td>
+                        </tr>
+           
+      </tbody>
+    </table>
+    <div class="form-inline">
+      <Label>รวม</Label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreCor9" name="totalScoreCor9" value="" style="width: 20%;background-color: #4FC4DE;color: white"  readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot9" name="totalScoreNot9" value="" style="width: 20%;background-color: #C5C100;color: white" readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot9x" name="totalScoreNot9x" value="" style="width: 20%;background-color: coral;color: white" readonly>&nbsp;
+        <button type="button" class="btn  btn-info" data-dismiss="modal">OK</button>
+    </div>
+    <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">OK</button> -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    <!-- End Modal -->
+      <!-- Modal -->
+  <div class="modal fade" id="myModal10" role="dialog">
+      <div class="modal-dialog">
+      
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <!-- <h4 class="modal-title">Modal Header</h4> -->
+          </div>
+          <div class="modal-body">
+            <p>Some text in the modal.</p>
+        
+           <table class="table">
+      <thead>
+        <tr>
+          <th>ลำดับ</th>
+          <th>ทิ้งถูกต้อง</th>
+          <th>ขยะฝังกลบ</th>
+          <th>เผาทิ้ง</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td> <input class="form-control calcCor10" type="number" id="electNo1" name="electNo1" value="" placeholder="0.00" step="0.01"> </td>
+          <td> <input class="form-control calc10" type="number" id="electNo1x" name="electNo1x" value="" placeholder="0.00" step="0.01" > </td>
+          <td><input class="form-control calc10x" type="number" id="electNo1y" name="electNo1y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><input class="form-control calcCor10" type="number" id="electNo2" name="electNo2" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc10" type="number" id="electNo2x" name="electNo2x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc10x" type="number" id="electNo2y" name="electNo2y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><input class="form-control calcCor10" type="number" id="electNo3" name="electNo3" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc10" type="number" id="electNo3x" name="electNo3x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc10x" type="number" id="electNo3y" name="electNo3y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+         <tr>
+            <td>4</td>
+            <td><input class="form-control calcCor10" type="number" id="electNo4" name="electNo4" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc10" type="number" id="electNo4x" name="electNo4x" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc10x" type="number" id="electNo4y" name="electNo4y" value="" placeholder="0.00" step="0.01"> </td>
+          </tr>
+          <tr>
+              <td>5</td>
+              <td><input class="form-control calcCor10" type="number" id="electNo5" name="electNo5" value="" placeholder="0.00" step="0.01"> </td>
+              <td><input class="form-control calc10" type="number" id="electNo5x" name="electNo5x" value="" placeholder="0.00" step="0.01"> </td>
+             <td><input class="form-control calc10x" type="number" id="electNo5y" name="electNo5y" value="" placeholder="0.00" step="0.01"> </td>
+            </tr>
+           
+              <tr>
+                      <td>6</td>
+                      <td> <input class="form-control calcCor10" type="number" id="electNo6" name="electNo6" value="" placeholder="0.00" step="0.01"> </td>
+                      <td> <input class="form-control calc10" type="number" id="electNo6x" name="electNo6x" value="" placeholder="0.00" step="0.01" > </td>
+                      <td><input class="form-control calc10x" type="number" id="electNo6y" name="electNo6y" value="" placeholder="0.00" step="0.01"> </td>
+                    </tr>
+                    <tr>
+                      <td>7</td>
+                      <td><input class="form-control calcCor10" type="number" id="electNo7" name="electNo7" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc10" type="number" id="electNo7x" name="electNo7x" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc10x" type="number" id="electNo7y" name="electNo7y" value="" placeholder="0.00" step="0.01"> </td>
+                    </tr>
+                    <tr>
+                      <td>8</td>
+                      <td><input class="form-control calcCor10" type="number" id="electNo8" name="electNo8" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc10" type="number" id="electNo8x" name="electNo8x" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc10x" type="number" id="electNo8y" name="electNo8y" value="" placeholder="0.00" step="0.01"> </td>
+                    </tr>
+                     <tr>
+                        <td>9</td>
+                        <td><input class="form-control calcCor10" type="number" id="electNo9" name="electNo9" value="" placeholder="0.00" step="0.01"> </td>
+                        <td><input class="form-control calc10" type="number" id="electNo9x" name="electNo9x" value="" placeholder="0.00" step="0.01"> </td>
+                        <td><input class="form-control calc10x" type="number" id="electNo9y" name="electNo9y" value="" placeholder="0.00" step="0.01"> </td>
+                      </tr>
+                      <tr>
+                          <td>10</td>
+                          <td><input class="form-control calcCor10" type="number" id="electNo10" name="electNo10" value="" placeholder="0.00" step="0.01"> </td>
+                          <td><input class="form-control calc10" type="number" id="electNo10x" name="electNo10x" value="" placeholder="0.00" step="0.01"> </td>
+                         <td><input class="form-control calc10x" type="number" id="electNo10y" name="electNo10y" value="" placeholder="0.00" step="0.01"> </td>
+                        </tr>
+           
+      </tbody>
+    </table>
+    <div class="form-inline">
+      <Label>รวม</Label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreCor10" name="totalScoreCor10" value="" style="width: 20%;background-color: #4FC4DE;color: white"  readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot10" name="totalScoreNot10" value="" style="width: 20%;background-color: #C5C100;color: white" readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot10x" name="totalScoreNot10x" value="" style="width: 20%;background-color: coral;color: white" readonly>&nbsp;
+        <button type="button" class="btn  btn-info" data-dismiss="modal">OK</button>
+    </div>
+    <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">OK</button> -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    <!-- End Modal -->
+      <!-- Modal -->
+  <div class="modal fade" id="myModal11" role="dialog">
+      <div class="modal-dialog">
+      
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <!-- <h4 class="modal-title">Modal Header</h4> -->
+          </div>
+          <div class="modal-body">
+            <p>Some text in the modal.</p>
+        
+           <table class="table">
+      <thead>
+        <tr>
+            <th>ลำดับ</th>
+            <th>ทิ้งถูกต้อง</th>
+            <th>ขยะฝังกลบ</th>
+            <th>เผาทิ้ง</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td> <input class="form-control calcCor11" type="number" id="infectiousNo1" name="infectiousNo1" value="" placeholder="0.00" step="0.01"> </td>
+          <td> <input class="form-control calc11" type="number" id="infectiousNo1x" name="infectiousNo1x" value="" placeholder="0.00" step="0.01" > </td>
+          <td><input class="form-control calc11x" type="number" id="infectiousNo1y" name="infectiousNo1y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><input class="form-control calcCor11" type="number" id="infectiousNo2" name="infectiousNo2" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc11" type="number" id="infectiousNo2x" name="infectiousNo2x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc11x" type="number" id="infectiousNo2y" name="infectiousNo2y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><input class="form-control calcCor11" type="number" id="infectiousNo3" name="infectiousNo3" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc11" type="number" id="infectiousNo3x" name="infectiousNo3x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc11x" type="number" id="infectiousNo3y" name="infectiousNo3y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+         <tr>
+            <td>4</td>
+            <td><input class="form-control calcCor11" type="number" id="infectiousNo4" name="infectiousNo4" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc11" type="number" id="infectiousNo4x" name="infectiousNo4x" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc11x" type="number" id="infectiousNo4y" name="infectiousNo4y" value="" placeholder="0.00" step="0.01"> </td>
+          </tr>
+          <tr>
+              <td>5</td>
+              <td><input class="form-control calcCor11" type="number" id="infectiousNo5" name="infectiousNo5" value="" placeholder="0.00" step="0.01"> </td>
+              <td><input class="form-control calc11" type="number" id="infectiousNo5x" name="infectiousNo5x" value="" placeholder="0.00" step="0.01"> </td>
+             <td><input class="form-control calc11x" type="number" id="infectiousNo5y" name="infectiousNo5y" value="" placeholder="0.00" step="0.01"> </td>
+            </tr>
+           
+              <tr>
+                      <td>6</td>
+                      <td> <input class="form-control calcCor11" type="number" id="infectiousNo6" name="infectiousNo6" value="" placeholder="0.00" step="0.01"> </td>
+                      <td> <input class="form-control calc11" type="number" id="infectiousNo6x" name="infectiousNo6x" value="" placeholder="0.00" step="0.01" > </td>
+                      <td><input class="form-control calc11x" type="number" id="infectiousNo6y" name="infectiousNo6y" value="" placeholder="0.00" step="0.01"> </td>
+                    </tr>
+                    <tr>
+                      <td>7</td>
+                      <td><input class="form-control calcCor11" type="number" id="infectiousNo7" name="infectiousNo7" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc11" type="number" id="infectiousNo7x" name="infectiousNo7x" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc11x" type="number" id="infectiousNo7y" name="infectiousNo7y" value="" placeholder="0.00" step="0.01"> </td>
+                    </tr>
+                    <tr>
+                      <td>8</td>
+                      <td><input class="form-control calcCor11" type="number" id="infectiousNo8" name="infectiousNo8" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc11" type="number" id="infectiousNo8x" name="infectiousNo8x" value="" placeholder="0.00" step="0.01"> </td>
+                      <td><input class="form-control calc11x" type="number" id="infectiousNo8y" name="infectiousNo8y" value="" placeholder="0.00" step="0.01"> </td>
+                    </tr>
+                     <tr>
+                        <td>9</td>
+                        <td><input class="form-control calcCor11" type="number" id="infectiousNo9" name="infectiousNo9" value="" placeholder="0.00" step="0.01"> </td>
+                        <td><input class="form-control calc11" type="number" id="infectiousNo9x" name="infectiousNo9x" value="" placeholder="0.00" step="0.01"> </td>
+                        <td><input class="form-control calc11x" type="number" id="infectiousNo9y" name="infectiousNo9y" value="" placeholder="0.00" step="0.01"> </td>
+                      </tr>
+                      <tr>
+                          <td>10</td>
+                          <td><input class="form-control calcCor11" type="number" id="infectiousNo10" name="infectiousNo10" value="" placeholder="0.00" step="0.01"> </td>
+                          <td><input class="form-control calc11" type="number" id="infectiousNo10x" name="infectiousNo10x" value="" placeholder="0.00" step="0.01"> </td>
+                         <td><input class="form-control calc11x" type="number" id="infectiousNo10y" name="infectiousNo10y" value="" placeholder="0.00" step="0.01"> </td>
+                        </tr>
+           
+      </tbody>
+    </table>
+    <div class="form-inline">
+      <Label>รวม</Label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreCor11" name="totalScoreCor11" value="" style="width: 20%;background-color: #4FC4DE;color: white"  readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot11" name="totalScoreNot11" value="" style="width: 20%;background-color: #C5C100;color: white" readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot11x" name="totalScoreNot11x" value="" style="width: 20%;background-color: coral;color: white" readonly>&nbsp;
+        <button type="button" class="btn  btn-info" data-dismiss="modal">OK</button>
+    </div>
+    <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">OK</button> -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    <!-- End Modal -->
+      <!-- Modal -->
+  <div class="modal fade" id="myModal12" role="dialog">
+      <div class="modal-dialog">
+      
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <!-- <h4 class="modal-title">Modal Header</h4> -->
+          </div>
+          <div class="modal-body">
+            <p>Some text in the modal.</p>
+        
+           <table class="table">
+      <thead>
+        <tr>
+            <th>ลำดับ</th>
+            <th>ทิ้งถูกต้อง</th>
+            <th>ขยะฝังกลบ</th>
+            <th>เผาทิ้ง</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td> <input class="form-control calcCor12" type="number" id="hazardNo1" name="hazardNo1" value="" placeholder="0.00" step="0.01"> </td>
+          <td> <input class="form-control calc12" type="number" id="hazardNo1x" name="hazardNo1x" value="" placeholder="0.00" step="0.01" > </td>
+          <td><input class="form-control calc12x" type="number" id="hazardNo1y" name="hazardNo1y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><input class="form-control calcCor12" type="number" id="hazardNo2" name="hazardNo2" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc12" type="number" id="hazardNo2x" name="hazardNo2x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc12x" type="number" id="hazardNo2y" name="hazardNo2y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><input class="form-control calcCor12" type="number" id="hazardNo3" name="hazardNo3" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc12" type="number" id="hazardNo3x" name="hazardNo3x" value="" placeholder="0.00" step="0.01"> </td>
+          <td><input class="form-control calc12x" type="number" id="hazardNo3y" name="hazardNo3y" value="" placeholder="0.00" step="0.01"> </td>
+        </tr>
+         <tr>
+            <td>4</td>
+            <td><input class="form-control calcCor12" type="number" id="hazardNo4" name="hazardNo4" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc12" type="number" id="hazardNo4x" name="hazardNo4x" value="" placeholder="0.00" step="0.01"> </td>
+            <td><input class="form-control calc12x" type="number" id="hazardNo4y" name="hazardNo4y" value="" placeholder="0.00" step="0.01"> </td>
+          </tr>
+          <tr>
+              <td>5</td>
+              <td><input class="form-control calcCor12" type="number" id="hazardNo5" name="hazardNo5" value="" placeholder="0.00" step="0.01"> </td>
+              <td><input class="form-control calc12" type="number" id="hazardNo5x" name="hazardNo5x" value="" placeholder="0.00" step="0.01"> </td>
+             <td><input class="form-control calc12x" type="number" id="hazardNo5y" name="hazardNo5y" value="" placeholder="0.00" step="0.01"> </td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td> <input class="form-control calcCor12" type="number" id="hazardNo6" name="hazardNo6" value="" placeholder="0.00" step="0.01"> </td>
+                <td> <input class="form-control calc12" type="number" id="hazardNo6x" name="hazardNo6x" value="" placeholder="0.00" step="0.01" > </td>
+                <td><input class="form-control calc12x" type="number" id="hazardNo6y" name="hazardNo6y" value="" placeholder="0.00" step="0.01"> </td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td><input class="form-control calcCor12" type="number" id="hazardNo7" name="hazardNo7" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc12" type="number" id="hazardNo7x" name="hazardNo7x" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc12x" type="number" id="hazardNo7y" name="hazardNo7y" value="" placeholder="0.00" step="0.01"> </td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td><input class="form-control calcCor12" type="number" id="hazardNo8" name="hazardNo8" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc12" type="number" id="hazardNo8x" name="hazardNo8x" value="" placeholder="0.00" step="0.01"> </td>
+                <td><input class="form-control calc12x" type="number" id="hazardNo8y" name="hazardNo8y" value="" placeholder="0.00" step="0.01"> </td>
+              </tr>
+               <tr>
+                  <td>9</td>
+                  <td><input class="form-control calcCor12" type="number" id="hazardNo9" name="hazardNo9" value="" placeholder="0.00" step="0.01"> </td>
+                  <td><input class="form-control calc12" type="number" id="hazardNo9x" name="hazardNo9x" value="" placeholder="0.00" step="0.01"> </td>
+                  <td><input class="form-control calc12x" type="number" id="hazardNo9y" name="hazardNo9y" value="" placeholder="0.00" step="0.01"> </td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td><input class="form-control calcCor12" type="number" id="hazardNo10" name="hazardNo10" value="" placeholder="0.00" step="0.01"> </td>
+                    <td><input class="form-control calc12" type="number" id="hazardNo10x" name="hazardNo10x" value="" placeholder="0.00" step="0.01"> </td>
+                   <td><input class="form-control calc12x" type="number" id="hazardNo10y" name="hazardNo10y" value="" placeholder="0.00" step="0.01"> </td>
+                  </tr>
+           
+      </tbody>
+    </table>
+    <div class="form-inline">
+      <Label>รวม</Label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreCor12" name="totalScoreCor12" value="" style="width: 20%;background-color: #4FC4DE;color: white"  readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot12" name="totalScoreNot12" value="" style="width: 20%;background-color: #C5C100;color: white" readonly>&nbsp;&nbsp;&nbsp;
+        <input class="form-control" type="text" id="totalScoreNot12x" name="totalScoreNot12x" value="" style="width: 20%;background-color: coral;color: white" readonly>&nbsp;
+        <button type="button" class="btn  btn-info" data-dismiss="modal">OK</button>
+    </div>
+    <!-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">OK</button> -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    <!-- End Modal -->
+
+            <label>รายละเอียด </label>
+<!-- 	       <button type="button" class="btn btn-primary" id="famity" name="famity" onclick="myfamity()" value="ครอบครัว" >ครอบครัว</button> -->
+<!-- 	        <button type="button" class="btn btn-primary" id="wfh" name="wfh" onclick="mywfh()" value="WFH" >WFH</button> -->
+	   <div style="padding-top: 2%;">
+            <textarea type="text" class="form-control" id="Detail" name="Detail" rows="3" value=""></textarea>
+	   </div>   
+             <p id="pointstime" name="pointstime"></p>       
+         <div>
+        </form>  
+          </div>
+          <center>
+                    <div style="padding-top: 2%;">
+                        <button type="button" class="btn btn-primary" id="btnRefresh" name="btnRefresh" >บันทึก</button>
+<!--                         <button type="button" class="btn btn-primary" id="btnCloseWindow" name="btnCloseWindow" >บันทึก และปิด</button> -->
+                    </div>
+                </center>
+      <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>    
+      <script type="text/javascript">
+      var map; // กำหนดตัวแปร map ไว้ด้านนอกฟังก์ชัน เพื่อให้สามารถเรียกใช้งาน จากส่วนอื่นได้
+      var GGM; // กำหนดตัวแปร GGM ไว้เก็บ google.maps Object จะได้เรียกใช้งานได้ง่ายขึ้น
+      
+      function initialize() { // ฟังก์ชันแสดงแผนที่
+          GGM=new Object(google.maps); // เก็บตัวแปร google.maps Object ไว้ในตัวแปร GGM
+          // กำหนดจุดเริ่มต้นของแผนที่
+          var my_Latlng  = new GGM.LatLng(13.761728449950002,100.6527900695800);
+          var my_mapTypeId=GGM.MapTypeId.ROADMAP; // กำหนดรูปแบบแผนที่ที่แสดง
+          // กำหนด DOM object ที่จะเอาแผนที่ไปแสดง ที่นี้คือ div id=map_canvas
+          var my_DivObj=$("#map_canvas")[0]; 
+          // กำหนด Option ของแผนที่
+          var myOptions = {
+              zoom: 13, // กำหนดขนาดการ zoom
+              center: my_Latlng , // กำหนดจุดกึ่งกลาง
+              mapTypeId:my_mapTypeId // กำหนดรูปแบบแผนที่
+          };
+          map = new GGM.Map(my_DivObj,myOptions);// สร้างแผนที่และเก็บตัวแปรไว้ในชื่อ map
+       
+       
+       
+          // เรียกใช้คุณสมบัติ ระบุตำแหน่ง ของ html 5 ถ้ามี
+          if(navigator.geolocation){
+                  navigator.geolocation.getCurrentPosition(function(position){
+                      var pos = new GGM.LatLng(position.coords.latitude,position.coords.longitude);
+                      var infowindow = new GGM.InfoWindow({
+                          map: map,
+                          position: pos,
+                          content: 'คุณอยู่ที่นี่.'
+                      });
+                       
+                      var my_Point = infowindow.getPosition();  // หาตำแหน่งของตัว marker เมื่อกดลากแล้วปล่อย
+                      map.panTo(my_Point);  // ให้แผนที่แสดงไปที่ตัว marker       
+                      $("#lat_value").val(my_Point.lat());  // เอาค่า latitude ตัว marker แสดงใน textbox id=lat_value
+                      $("#lon_value").val(my_Point.lng()); // เอาค่า longitude ตัว marker แสดงใน textbox id=lon_value 
+                      $("#zoom_value").val(map.getZoom()); // เอาขนาด zoom ของแผนที่แสดงใน textbox id=zoom_value              
+                      map.setCenter(pos);
+                  },function() {
+                      // คำสั่งทำงาน ถ้า ระบบระบุตำแหน่ง geolocation ผิดพลาด หรือไม่ทำงาน
+                  });
+          }else{
+               // คำสั่งทำงาน ถ้า บราวเซอร์ ไม่สนับสนุน ระบุตำแหน่ง
+          }
+         
+          // กำหนด event ให้กับตัวแผนที่ เมื่อมีการเปลี่ยนแปลงการ zoom
+          GGM.event.addListener(map, 'zoom_changed', function() {
+              $("#zoom_value").val(map.getZoom()); // เอาขนาด zoom ของแผนที่แสดงใน textbox id=zoom_value  
+          });
+       
+      }
+      $(function(){
+      
+          $("<script/>", {
+            "type": "text/javascript",
+           src: "//maps.google.com/maps/api/js?v=3.2&sensor=false&language=th&callback=initialize"
+          }).appendTo("body");    
+      });
+      </script>  
+      
+      <br/> <br />
+      <div id="location"></div>
+     
+      <script type="text/javascript">
+      sumCor()
+      sumNot()
+      sumNotx()
+      sumCor2()
+      sumNot2()
+      sumNot2x()
+      sumCor3()
+      sumNot3()
+      sumNot3x()
+      sumCor4()
+      sumNot4()
+      sumNot4x()
+      sumCor5()
+      sumNot5()
+      sumNot5x()
+      sumCor6()
+      sumNot6()
+      sumNot6x()
+      sumCor7()
+      sumNot7()
+      sumNot7x()
+      sumCor8()
+      sumNot8()
+      sumNot8x()
+      sumCor9()
+      sumNot9()
+      sumNot9x()
+      sumCor10()
+      sumNot10()
+      sumNot10x()
+      sumCor11()
+      sumNot11()
+      sumNot11x()
+      sumCor12()
+      sumNot12()
+      sumNot12x()
+    
+      $().ready(function(){
+					$(".calc").change(function(){
+            // sumCor()
+            sumNot()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc2").change(function(){
+            // sumCor()
+            sumNot2()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc3").change(function(){
+            // sumCor()
+            sumNot3()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc4").change(function(){
+            // sumCor()
+            sumNot4()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc5").change(function(){
+            // sumCor()
+            sumNot5()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc6").change(function(){
+            // sumCor()
+            sumNot6()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc7").change(function(){
+            // sumCor()
+            sumNot7()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc8").change(function(){
+            // sumCor()
+            sumNot8()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc9").change(function(){
+            // sumCor()
+            sumNot9()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc10").change(function(){
+            // sumCor()
+            sumNot10()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc11").change(function(){
+            // sumCor()
+            sumNot11()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc12").change(function(){
+            // sumCor()
+            sumNot12()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calcx").change(function(){
+            // sumCor()
+            sumNotx()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc2x").change(function(){
+            // sumCor()
+            sumNot2x()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc3x").change(function(){
+            // sumCor()
+            sumNot3x()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc4x").change(function(){
+            // sumCor()
+            sumNot4x()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc5x").change(function(){
+            // sumCor()
+            sumNot5x()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc6x").change(function(){
+            // sumCor()
+            sumNot6x()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc7x").change(function(){
+            // sumCor()
+            sumNot7x()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc8x").change(function(){
+            // sumCor()
+            sumNot8x()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc9x").change(function(){
+            // sumCor()
+            sumNot9x()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc10x").change(function(){
+            // sumCor()
+            sumNot10x()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc11x").change(function(){
+            // sumCor()
+            sumNot11x()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calc12x").change(function(){
+            // sumCor()
+            sumNot12x()
+    
+    
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+
+				});
+        $().ready(function(){
+					$(".calcCor").change(function(){
+            sumCor()
+            // sumNot()
+           
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calcCor2").change(function(){
+            sumCor2()
+            // sumNot()
+           
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calcCor3").change(function(){
+            sumCor3()
+            // sumNot()
+           
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calcCor4").change(function(){
+            sumCor4()
+            // sumNot()
+           
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calcCor5").change(function(){
+            sumCor5()
+            // sumNot()
+           
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calcCor6").change(function(){
+            sumCor6()
+            // sumNot()
+           
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calcCor7").change(function(){
+            sumCor7()
+            // sumNot()
+           
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calcCor8").change(function(){
+            sumCor8()
+            // sumNot()
+           
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calcCor9").change(function(){
+            sumCor9()
+            // sumNot()
+           
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calcCor10").change(function(){
+            sumCor10()
+            // sumNot()
+           
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calcCor11").change(function(){
+            sumCor11()
+            // sumNot()
+           
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+          $(".calcCor12").change(function(){
+            sumCor12()
+            // sumNot()
+           
+							var a = $(this).attr('value');
+							// alert(a);
+							console.log(a);
+							
+					});
+				});
+	    
+       function sumCor() {
+
+        var sumInit = 0;
+        $(".calcCor").each(function() {
+          sumInit += (1 * $(this).val());
+
+
+        });
+        $("#totalScoreCor").val(parseFloat(sumInit).toFixed(2))
+        $("#general").val(parseFloat(sumInit).toFixed(2))
+        return sumInit;
+        }
+        function sumNot() {
+
+        var sumInitS = 0;
+        $(".calc").each(function() {
+        sumInitS += (1 * $(this).val());
+     
+        });
+
+        $("#totalScoreNot").val(parseFloat(sumInitS).toFixed(2))
+        $("#generalCorrect").val(parseFloat(sumInitS).toFixed(2))
+        return sumInitS;
+        }
+        function sumNotx() {
+
+        var sumInitSx = 0;
+        $(".calcx").each(function() {
+        sumInitSx += (1 * $(this).val());
+
+        });
+
+        $("#totalScoreNotx").val(parseFloat(sumInitSx).toFixed(2))
+        $("#generalCorrectx").val(parseFloat(sumInitSx).toFixed(2))
+        return sumInitSx;
+        }
+        function sumCor2() {
+
+        var sumInit2 = 0;
+        $(".calcCor2").each(function() {
+          sumInit2 += (1 * $(this).val());
+        });
+        $("#totalScoreCor2").val(parseFloat(sumInit2).toFixed(2))
+        $("#pet").val(parseFloat(sumInit2).toFixed(2))
+        return sumInit2;
+        }
+        function sumNot2() {
+
+        var sumInitS2 = 0;
+        $(".calc2").each(function() {
+        sumInitS2 += (1 * $(this).val());
+        });
+
+        $("#totalScoreNot2").val(parseFloat(sumInitS2).toFixed(2))
+        $("#petCorrect").val(parseFloat(sumInitS2).toFixed(2))
+        return sumInitS2;
+        }
+        function sumNot2x() {
+
+        var sumInitS2x = 0;
+        $(".calc2x").each(function() {
+        sumInitS2x += (1 * $(this).val());
+        });
+
+        $("#totalScoreNot2x").val(parseFloat(sumInitS2x).toFixed(2))
+        $("#petCorrectx").val(parseFloat(sumInitS2x).toFixed(2))
+        return sumInitS2x;
+        }
+
+
+        function sumCor3() {
+
+        var sumInit3 = 0;
+        $(".calcCor3").each(function() {
+          sumInit3 += (1 * $(this).val());
+        });
+        $("#totalScoreCor3").val(parseFloat(sumInit3).toFixed(2))
+        $("#ldpe").val(parseFloat(sumInit3).toFixed(2))
+        return sumInit3;
+        }
+        function sumNot3() {
+
+        var sumInitS3 = 0;
+        $(".calc3").each(function() {
+        sumInitS3 += (1 * $(this).val());
+        });
+
+        $("#totalScoreNot3").val(parseFloat(sumInitS3).toFixed(2))
+        $("#ldpeCorrect").val(parseFloat(sumInitS3).toFixed(2))
+        return sumInitS3;
+        }
+        function sumNot3x() {
+
+          var sumInitS3x = 0;
+          $(".calc3x").each(function() {
+          sumInitS3x += (1 * $(this).val());
+          });
+
+          $("#totalScoreNot3x").val(parseFloat(sumInitS3x).toFixed(2))
+          $("#ldpeCorrectx").val(parseFloat(sumInitS3x).toFixed(2))
+          return sumInitS3x;
+          }
+
+        function sumCor4() {
+
+          var sumInit4 = 0;
+          $(".calcCor4").each(function() {
+            sumInit4 += (1 * $(this).val());
+          });
+          $("#totalScoreCor4").val(parseFloat(sumInit4).toFixed(2))
+          $("#hdpe").val(parseFloat(sumInit4).toFixed(2))
+          return sumInit4;
+          }
+          function sumNot4() {
+
+          var sumInitS4 = 0;
+          $(".calc4").each(function() {
+          sumInitS4 += (1 * $(this).val());
+          });
+
+          $("#totalScoreNot4").val(parseFloat(sumInitS4).toFixed(2))
+          $("#hdpeCorrect").val(parseFloat(sumInitS4).toFixed(2))
+          return sumInitS4;
+          }
+
+          function sumNot4x() {
+
+          var sumInitS4x = 0;
+          $(".calc4x").each(function() {
+          sumInitS4x += (1 * $(this).val());
+          });
+
+          $("#totalScoreNot4x").val(parseFloat(sumInitS4x).toFixed(2))
+          $("#hdpeCorrectx").val(parseFloat(sumInitS4x).toFixed(2))
+          return sumInitS4x;
+          }
+          function sumCor5() {
+
+            var sumInit5 = 0;
+            $(".calcCor5").each(function() {
+              sumInit5 += (1 * $(this).val());
+            });
+            $("#totalScoreCor5").val(parseFloat(sumInit5).toFixed(2))
+            $("#paper").val(parseFloat(sumInit5).toFixed(2))
+            return sumInit5;
+          }
+          function sumNot5() {
+
+            var sumInitS5= 0;
+            $(".calc5").each(function() {
+            sumInitS5 += (1 * $(this).val());
+            });
+
+            $("#totalScoreNot5").val(parseFloat(sumInitS5).toFixed(2))
+            $("#paperCorrect").val(parseFloat(sumInitS5).toFixed(2))
+            return sumInitS5;
+          }
+          function sumNot5x() {
+
+          var sumInitS5x= 0;
+          $(".calc5x").each(function() {
+          sumInitS5x += (1 * $(this).val());
+          });
+
+          $("#totalScoreNot5x").val(parseFloat(sumInitS5x).toFixed(2))
+          $("#paperCorrectx").val(parseFloat(sumInitS5x).toFixed(2))
+          return sumInitS5x;
+          }
+
+          function sumCor6() {
+
+          var sumInit6 = 0;
+          $(".calcCor6").each(function() {
+            sumInit6 += (1 * $(this).val());
+          });
+          $("#totalScoreCor6").val(parseFloat(sumInit6).toFixed(2))
+          $("#glass").val(parseFloat(sumInit6).toFixed(2))
+          return sumInit6;
+          }
+          function sumNot6() {
+
+          var sumInitS6= 0;
+          $(".calc6").each(function() {
+          sumInitS6 += (1 * $(this).val());
+          });
+
+          $("#totalScoreNot6").val(parseFloat(sumInitS6).toFixed(2))
+          $("#glassCorrect").val(parseFloat(sumInitS6).toFixed(2))
+          return sumInitS6;
+          }
+          function sumNot6x() {
+
+          var sumInitS6x= 0;
+          $(".calc6x").each(function() {
+          sumInitS6x += (1 * $(this).val());
+          });
+
+          $("#totalScoreNot6x").val(parseFloat(sumInitS6x).toFixed(2))
+          $("#glassCorrectx").val(parseFloat(sumInitS6x).toFixed(2))
+          return sumInitS6x;
+          }
+
+          function sumCor7() {
+
+          var sumInit7 = 0;
+          $(".calcCor7").each(function() {
+            sumInit7 += (1 * $(this).val());
+          });
+          $("#totalScoreCor7").val(parseFloat(sumInit7).toFixed(2))
+          $("#au").val(parseFloat(sumInit7).toFixed(2))
+          return sumInit7;
+          }
+          function sumNot7() {
+
+          var sumInitS7= 0;
+          $(".calc7").each(function() {
+          sumInitS7 += (1 * $(this).val());
+          });
+
+          $("#totalScoreNot7").val(parseFloat(sumInitS7).toFixed(2))
+          $("#auCorrect").val(parseFloat(sumInitS7).toFixed(2))
+          return sumInitS7;
+          }
+          function sumNot7x() {
+
+          var sumInitS7x= 0;
+          $(".calc7x").each(function() {
+          sumInitS7x += (1 * $(this).val());
+          });
+
+          $("#totalScoreNot7x").val(parseFloat(sumInitS7x).toFixed(2))
+          $("#auCorrectx").val(parseFloat(sumInitS7x).toFixed(2))
+          return sumInitS7x;
+          }
+
+
+          function sumCor8() {
+
+          var sumInit8 = 0;
+          $(".calcCor8").each(function() {
+            sumInit8 += (1 * $(this).val());
+          });
+          $("#totalScoreCor8").val(parseFloat(sumInit8).toFixed(2))
+          $("#n15").val(parseFloat(sumInit8).toFixed(2))
+          return sumInit8;
+          }
+          function sumNot8() {
+
+          var sumInitS8= 0;
+          $(".calc8").each(function() {
+          sumInitS8 += (1 * $(this).val());
+          });
+
+          $("#totalScoreNot8").val(parseFloat(sumInitS8).toFixed(2))
+          $("#n15Correct").val(parseFloat(sumInitS8).toFixed(2))
+          return sumInitS8;
+          }
+          function sumNot8x() {
+
+            var sumInitS8x= 0;
+            $(".calc8x").each(function() {
+            sumInitS8x += (1 * $(this).val());
+            });
+
+            $("#totalScoreNot8x").val(parseFloat(sumInitS8x).toFixed(2))
+            $("#n15Correctx").val(parseFloat(sumInitS8x).toFixed(2))
+            return sumInitS8x;
+            }
+            function sumCor9() {
+
+            var sumInit9 = 0;
+            $(".calcCor9").each(function() {
+              sumInit9 += (1 * $(this).val());
+            });
+            $("#totalScoreCor9").val(parseFloat(sumInit9).toFixed(2))
+            $("#foodWaste").val(parseFloat(sumInit9).toFixed(2))
+            return sumInit9;
+            }
+            function sumNot9() {
+
+            var sumInitS9= 0;
+            $(".calc9").each(function() {
+            sumInitS9 += (1 * $(this).val());
+            });
+
+            $("#totalScoreNot9").val(parseFloat(sumInitS9).toFixed(2))
+            $("#foodWasteCorrect").val(parseFloat(sumInitS9).toFixed(2))
+            return sumInitS9;
+            }
+            function sumNot9x() {
+
+              var sumInitS9x= 0;
+              $(".calc9x").each(function() {
+              sumInitS9x += (1 * $(this).val());
+              });
+
+              $("#totalScoreNot9x").val(parseFloat(sumInitS9x).toFixed(2))
+              $("#foodWasteCorrectx").val(parseFloat(sumInitS9x).toFixed(2))
+              return sumInitS9x;
+              }
+
+
+              function sumCor10() {
+
+              var sumInit10 = 0;
+              $(".calcCor10").each(function() {
+                sumInit10 += (1 * $(this).val());
+              });
+              $("#totalScoreCor10").val(parseFloat(sumInit10).toFixed(2))
+              $("#elect").val(parseFloat(sumInit10).toFixed(2))
+              return sumInit10;
+              }
+              function sumNot10() {
+
+              var sumInitS10= 0;
+              $(".calc10").each(function() {
+                sumInitS10 += (1 * $(this).val());
+              });
+
+              $("#totalScoreNot10").val(parseFloat(sumInitS10).toFixed(2))
+              $("#electCorrect").val(parseFloat(sumInitS10).toFixed(2))
+              return sumInitS10;
+              }
+              function sumNot10x() {
+
+                var sumInitS10x= 0;
+                $(".calc10x").each(function() {
+                  sumInitS10x += (1 * $(this).val());
+                });
+
+                $("#totalScoreNot10x").val(parseFloat(sumInitS10x).toFixed(2))
+                $("#electCorrectx").val(parseFloat(sumInitS10x).toFixed(2))
+                return sumInitS10x;
+                }
+
+                function sumCor11() {
+
+                var sumInit11 = 0;
+                $(".calcCor11").each(function() {
+                  sumInit11 += (1 * $(this).val());
+                });
+                $("#totalScoreCor11").val(parseFloat(sumInit11).toFixed(2))
+                $("#infectious").val(parseFloat(sumInit11).toFixed(2))
+                return sumInit11;
+                }
+                function sumNot11() {
+
+                var sumInitS11= 0;
+                $(".calc11").each(function() {
+                  sumInitS11 += (1 * $(this).val());
+                });
+
+                $("#totalScoreNot11").val(parseFloat(sumInitS11).toFixed(2))
+                $("#infectiousCorrect").val(parseFloat(sumInitS11).toFixed(2))
+                return sumInitS11;
+                }
+                function sumNot11x() {
+
+                  var sumInitS11x= 0;
+                  $(".calc11x").each(function() {
+                    sumInitS11x += (1 * $(this).val());
+                  });
+
+                  $("#totalScoreNot11x").val(parseFloat(sumInitS11x).toFixed(2))
+                  $("#infectiousCorrectx").val(parseFloat(sumInitS11x).toFixed(2))
+                  return sumInitS11x;
+                  }
+
+                function sumCor12() {
+
+                  var sumInit12 = 0;
+                  $(".calcCor12").each(function() {
+                    sumInit12 += (1 * $(this).val());
+                  });
+                  $("#totalScoreCor12").val(parseFloat(sumInit12).toFixed(2))
+                  $("#hazard").val(parseFloat(sumInit12).toFixed(2))
+                  return sumInit12;
+                  }
+                  function sumNot12() {
+
+                  var sumInitS12= 0;
+                  $(".calc12").each(function() {
+                    sumInitS12 += (1 * $(this).val());
+                  });
+
+                  $("#totalScoreNot12").val(parseFloat(sumInitS12).toFixed(2))
+                  $("#hazardCorrect").val(parseFloat(sumInitS12).toFixed(2))
+                  return sumInitS12;
+                  }
+                  function sumNot12x() {
+
+                    var sumInitS12x= 0;
+                    $(".calc12x").each(function() {
+                      sumInitS12x += (1 * $(this).val());
+                    });
+
+                    $("#totalScoreNot12x").val(parseFloat(sumInitS12x).toFixed(2))
+                    $("#hazardCorrectx").val(parseFloat(sumInitS12x).toFixed(2))
+                    return sumInitS12x;
+                    }
+
+	      if ($("#activity").val() == "1"){
+		   window.addEventListener("load", function() {
+		    var now = new Date();
+		    var utcString = now.toISOString().substring(0, 19);
+		    var year = now.getFullYear();
+		    var month = now.getMonth() + 1;
+		    var day = now.getDate();
+		    var hour = now.getHours();
+		    var minute = now.getMinutes();
+		    var second = now.getSeconds();
+		    var localDatetime = year + "-" +
+			(month < 10 ? "0" + month.toString() : month) + "-" +
+			(day < 10 ? "0" + day.toString() : day);
+		 var localtime = 
+			(hour < 10 ? "0" + hour.toString() : hour) + ":" +
+			(minute < 10 ? "0" + minute.toString() : minute);
+		    var datetimeField = document.getElementById("dateTimes");
+		    datetimeField.value = localDatetime;
+		    var sumfi = (minute < 10 ? "0" + minute.toString() : minute)
+
+			   $("#vehicle option[value=8]").attr('selected', 'selected');
+ 
+				// Or just...
+				$("#vehicle").val(8);
+		   })
+		      
+
+	      }else{
+		   window.addEventListener("load", function() {
+		    var now = new Date();
+		    var utcString = now.toISOString().substring(0, 19);
+		    var year = now.getFullYear();
+		    var month = now.getMonth() + 1;
+		    var day = now.getDate();
+		    var hour = now.getHours();
+		    var minute = now.getMinutes();
+		    var second = now.getSeconds();
+		    var localDatetime = year + "-" +
+			(month < 10 ? "0" + month.toString() : month) + "-" +
+			(day < 10 ? "0" + day.toString() : day);
+		 var localtime = 
+			(hour < 10 ? "0" + hour.toString() : hour) + ":" +
+			(minute < 10 ? "0" + minute.toString() : minute);
+		    var datetimeField = document.getElementById("dateTimes");
+		    datetimeField.value = localDatetime;
+		    var sumfi = (minute < 10 ? "0" + minute.toString() : minute)
+
+			   if($("#activity").val() == "10"){
+			       $("#vehicle option[value=8]").attr('selected', 'selected');
+ 
+				// Or just...
+				$("#vehicle").val(8);
+			      
+			      }else{
+			       $("#vehicle option[value=6]").attr('selected', 'selected');
+ 
+				// Or just...
+				$("#vehicle").val(6);
+			      }
+			  
+	      })
+		      
+	      };
+	 
+       
+        function getLocation() {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+          } else { 
+            $('#location').html("Geolocation is not supported by this browser.");
+          }
+        }
+      
+        function showPosition(position) {
+          var location = "Latitude: " + position.coords.latitude +  "<br>Longitude: " + position.coords.longitude;
+              lat = position.coords.latitude;
+              long = position.coords.longitude;
+              $('#location').html(location);
+
+        }
+	      function myFunction() {	
+			  if ($("#activity").val() == "1"){
+				 
+				 var now = new Date();
+		    var utcString = now.toISOString().substring(0, 19);
+		    var year = now.getFullYear();
+		    var month = now.getMonth() + 1;
+		    var day = now.getDate();
+		    var hour = now.getHours();
+		    var minute = now.getMinutes();
+		    var second = now.getSeconds();
+		    var localDatetime = year + "-" +
+			(month < 10 ? "0" + month.toString() : month) + "-" +
+			(day < 10 ? "0" + day.toString() : day);
+		 var localtime = 
+			(hour < 10 ? "0" + hour.toString() : hour) + ":" +
+			(minute < 10 ? "0" + minute.toString() : minute);
+		    var datetimeField = document.getElementById("dateTimes");
+		    datetimeField.value = localDatetime;
+		    var sumfi = (minute < 10 ? "0" + minute.toString() : minute)
+		    var datetimeFieldx = document.getElementById("startdatetime");
+		    datetimeFieldx.value = "00:01";
+		  var datetimeFieldxy = document.getElementById("finishdatetime");
+		    datetimeFieldxy.value = "23:59"; 
+				  $("#vehicle option[value=8]").attr('selected', 'selected');
+ 
+				// Or just...
+				$("#vehicle").val(8);
+				
+			  }else{
+				  
+// 				  $( "select option:selected" ).each(function() {
+//      				 var number = 6
+// 				   var numberxy = document.getElementById("vehicle");
+// 				  numberxy.value = number
+// 				  document.getElementById("vehicle").innerHTML =  numberxy;
+//     				});
+				if($("#activity").val() == "10"){
+			       $("#vehicle option[value=8]").attr('selected', 'selected');
+ 
+				// Or just...
+				$("#vehicle").val(8);
+			      
+			      }else{
+			       $("#vehicle option[value=6]").attr('selected', 'selected');
+ 
+				// Or just...
+				$("#vehicle").val(6);
+			      }
+		    var now = new Date();
+		    var utcString = now.toISOString().substring(0, 19);
+		    var year = now.getFullYear();
+		    var month = now.getMonth() + 1;
+		    var day = now.getDate();
+		    var hour = now.getHours();
+		    var minute = now.getMinutes();
+		    var second = now.getSeconds();
+		    var localDatetime = year + "-" +
+			(month < 10 ? "0" + month.toString() : month) + "-" +
+			(day < 10 ? "0" + day.toString() : day);
+		 var localtime = 
+			(hour < 10 ? "0" + hour.toString() : hour) + ":" +
+			(minute < 10 ? "0" + minute.toString() : minute);
+		   
+		    var sumfi = (minute < 10 ? "0" + minute.toString() : minute)
+		    var datetimeFieldx = document.getElementById("startdatetime");
+		    datetimeFieldx.value = "08:00";
+	            document.getElementById("startdatetime").innerHTML =  datetimeFieldx;
+		  var datetimeFieldxy = document.getElementById("finishdatetime");
+		    datetimeFieldxy.value = "16:00";  
+                     document.getElementById("finishdatetime").innerHTML =  datetimeFieldxy;
+			  }
+	    
+	}
+	     function myfamity(){
+		  var x = document.getElementById("famity").value;
+                  document.getElementById("meeting").innerHTML =  x;
+		  
+	     }
+	  function mywfh(){
+		  var y = document.getElementById("wfh").value;
+                  document.getElementById("meeting").innerHTML =  y;
+		  
+	     }
+        $(document).ready(function() {
+          $("#hazard").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo1").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo1x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo1y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo2").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo2x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo2y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo3").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo3x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo3y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo4").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo4x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo4y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo5").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo5x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo5y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo6").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo6x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo6y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo7").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo7x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo7y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo8").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo8x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo8y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo9").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo9x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo9y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo10").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo10x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hazardNo10y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+
+
+     $("#infectious").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo1").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo1x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo1y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo2").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo2x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo2y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo3").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo3x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo3y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo4").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo4x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo4y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo5").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo5x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo5y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     //new
+     $("#infectiousNo6").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo6x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo6y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo7").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo7x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo7y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo8").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo8x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo8y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo9").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo9x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo9y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo10").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo10x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#infectiousNo10y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+
+
+
+     $("#elect").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo1").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo1x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo1y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo2").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo2x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo2y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo3").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo3x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo3y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo4").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo4x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo4y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo5").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo5x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo5y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     //new
+     $("#electNo6").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo6x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo6y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo7").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo7x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo7y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo8").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo8x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo8y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo9").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo9x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo9y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo10").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo10x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#electNo10y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+
+     $("#general").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo1").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo1x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo1y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo2").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo2x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo2y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo3").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo3x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo3y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo4").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo4x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo4y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo5").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo5x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo5y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     //new
+     $("#generalNo6").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo6x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo6y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo7").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo7x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo7y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo8").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo8x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo8y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo9").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo9x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo9y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo10").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo10x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#generalNo10y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+         
+		 $("#ldpe").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo1").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo1x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo1y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo2").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo2x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo2y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo3").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo3x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo3y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo4").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo4x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo4y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo5").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo5x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo5y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+//new
+$("#ldpeNo6").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo6x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo6y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo7").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo7x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo7y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo8").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo8x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo8y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo9").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo9x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo9y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo10").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo10x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#ldpeNo10y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+
+
+
+		$("#pet").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo1").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo1x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo1y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo2").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo2x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo2y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo3").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo3x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo3y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo4").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo4x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo4y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo5").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo5x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo5y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     //new
+     $("#petNo6").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo6x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo6y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo7").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo7x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo7y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo8").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo8x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo8y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo9").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo9x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo9y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo10").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo10x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#petNo10y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+
+
+
+		$("#hdpe").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo1").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo1x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo1y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo2").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo2x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo2y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo3").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo3x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo3y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo4").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo4x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo4y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo5").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo5x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo5y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+//new
+$("#hdpeNo6").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo6x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo6y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo7").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo7x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo7y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo8").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo8x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo8y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo9").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo9x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo9y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo10").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo10x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#hdpeNo10y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+
+		$("#paper").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo1").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo1x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo1y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo2").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo2x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo2y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo3").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo3x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo3y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo4").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo4x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo4y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo5").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo5x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo5y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     //new
+     $("#paperNo6").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo6x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo6y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo7").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo7x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo7y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo8").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo8x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo8y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo9").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo9x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo9y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo10").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo10x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#paperNo10y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+
+		$("#au").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo1").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo1x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo1y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo2").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo2x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo2y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo3").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo3x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo3y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo4").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo4x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo4y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo5").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo5x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo5y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+//new
+$("#auNo6").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo6x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo6y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo7").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo7x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo7y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo8").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo8x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo8y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo9").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo9x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo9y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo10").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo10x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#auNo10y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+
+		$("#glass").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo1").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo1x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo1y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo2").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo2x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo2y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo3").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo3x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo3y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo4").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo4x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo4y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo5").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo5x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo5y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     //new
+     $("#glassNo6").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo6x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo6y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo7").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo7x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo7y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo8").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo8x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo8y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo9").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo9x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo9y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo10").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo10x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#glassNo10y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+
+
+		$("#n15").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No1").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No1x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No1y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No2").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No2x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No2y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No3").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No3x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No3y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No4").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No4x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No4y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No5").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No5x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No5y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     //new
+     $("#n15No6").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No6x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No6y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No7").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No7x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No7y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No8").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No8x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No8y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No9").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No9x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No9y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No10").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No10x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#n15No10y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+
+		$("#foodWaste").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo1").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo1x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo1y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo2").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo2x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo2y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo3").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo3x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo3y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo4").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo4x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo4y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo5").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo5x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo5y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+   //new
+   $("#foodWasteNo6").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo6x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo6y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo7").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo7x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo7y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo8").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo8x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo8y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo9").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo9x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo9y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo10").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo10x").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+     $("#foodWasteNo10y").change(function() {
+			$(this).val(parseFloat($(this).val()).toFixed(2));
+		 });
+                
+          var lat;
+          var long;
+       
+		  $("#btnCloseWindow").on("click", function() {                       
+                      
+		  // sumpointstime();
+			   validateFeild();
+//                       getLocation();
+            	if (validated == true ) {
+                const data={userID:$("#userId2").text(),locationArea:$("#locationArea").val(),dateTimes:$("#dateTimes").val(),ldpe:$("#ldpe").val(),ldpeCorrect:$("#ldpeCorrect").val(),Garbageldpe:$("#ldpeCorrectx").val(),pet:$("#pet").val(),petCorrect:$("#petCorrect").val(),Garbagepet:$("#petCorrectx").val(),hdpe:$("#hdpe").val(),hdpeCorrect:$("#hdpeCorrect").val(),Garbagehdpe:$("#hdpeCorrectx").val(),paper:$("#paper").val(),paperCorrect:$("#paperCorrect").val(),Garbagepaper:$("#paperCorrectx").val(),au:$("#au").val(),auCorrect:$("#auCorrect").val(),Garbageau:$("#auCorrectx").val(),glass:$("#glass").val(),glassCorrect:$("#glassCorrect").val(),Garbageglass:$("#glassCorrecxt").val(),n15:$("#n15").val(),n15Correct:$("#n15Correct").val(),Garbagen15:$("#n15Correctx").val(),foodWaste:$("#foodWaste").val(),foodWasteCorrect:$("#foodWasteCorrect").val(),GarbagefoodWaste:$("#foodWasteCorrectx").val(),general:$("#general").val(),generalCorrect:$("#generalCorrect").val(),Garbagegeneral:$("#generalCorrectx").val(),elect:$("#elect").val(),electCorrect:$("#electCorrect").val(),Garbageelect:$("#electCorrectx").val(),infectious:$("#infectious").val(),infectiousCorrect:$("#infectiousCorrect").val(),Garbageinfectious:$("#infectiousCorrectx").val(),hazard:$("#hazard").val(),hazardCorrect:$("#hazardCorrect").val(),Garbagehazard:$("#hazardCorrectx").val(),Detail:$("#Detail").val()}
+                      console.log(data); 
+                    //  $("#lat_value").val(my_Point.lat());  // เอาค่า latitude ตัว marker แสดงใน textbox id=lat_value
+                    //  $("#lon_value").val(my_Point.lng());
+                      $.post( "https://entech.boonrawd.co.th/wastecollectivebrb", data, function( data ) {
+                      console.log(data);
+                      confirm(data)
+                      }, "json");
+                       swal({
+                            title: "Good job!",
+                            text: "คุณได้บันทึกปริมาณขยะเรียบร้อยแล้ว",
+                            icon: "success",
+
+                            buttons: true,
+                            buttons: "OK"
+                        }).then((value) => {
+                            liff.closeWindow();
+                        });
+              	validated = false;
+
+                    } else  {
+                     
+                      if ($("#locationArea").val() == "0") {
+                        swal("บันทึกข้อมูลไม่สำเร็จ!", "กรุณาเลือกพื้นที่", "warning");  
+                      } else {
+                      }
+                      
+                      }
+              });
+	      $("#btnRefresh").on("click", function() { 
+             
+                        // sumpointstime();
+                       validateFeild();
+//                       getLocation();
+                 	if (validated == true ) {
+                    const data={userID:$("#userId2").text(),locationArea:$("#locationArea").val(),dateTimes:$("#dateTimes").val(),ldpe:$("#ldpe").val(),ldpeCorrect:$("#ldpeCorrect").val(),Garbageldpe:$("#ldpeCorrectx").val(),pet:$("#pet").val(),petCorrect:$("#petCorrect").val(),Garbagepet:$("#petCorrectx").val(),hdpe:$("#hdpe").val(),hdpeCorrect:$("#hdpeCorrect").val(),Garbagehdpe:$("#hdpeCorrectx").val(),paper:$("#paper").val(),paperCorrect:$("#paperCorrect").val(),Garbagepaper:$("#paperCorrectx").val(),au:$("#au").val(),auCorrect:$("#auCorrect").val(),Garbageau:$("#auCorrectx").val(),glass:$("#glass").val(),glassCorrect:$("#glassCorrect").val(),Garbageglass:$("#glassCorrecxt").val(),n15:$("#n15").val(),n15Correct:$("#n15Correct").val(),Garbagen15:$("#n15Correctx").val(),foodWaste:$("#foodWaste").val(),foodWasteCorrect:$("#foodWasteCorrect").val(),GarbagefoodWaste:$("#foodWasteCorrectx").val(),general:$("#general").val(),generalCorrect:$("#generalCorrect").val(),Garbagegeneral:$("#generalCorrectx").val(),elect:$("#elect").val(),electCorrect:$("#electCorrect").val(),Garbageelect:$("#electCorrectx").val(),infectious:$("#infectious").val(),infectiousCorrect:$("#infectiousCorrect").val(),Garbageinfectious:$("#infectiousCorrectx").val(),hazard:$("#hazard").val(),hazardCorrect:$("#hazardCorrect").val(),Garbagehazard:$("#hazardCorrectx").val(),Detail:$("#Detail").val()}
+                      console.log(data); 
+                    //  $("#lat_value").val(my_Point.lat());  // เอาค่า latitude ตัว marker แสดงใน textbox id=lat_value
+                    //  $("#lon_value").val(my_Point.lng());
+                      $.post( "https://entech.boonrawd.co.th/wastecollectivebrb", data, function( data ) {
+                      console.log(data);
+                      confirm(data)
+                      }, "json");
+                       swal({
+                            title: "Good job!",
+                            text: "คุณได้บันทึกปริมาณขยะเรียบร้อยแล้ว",
+                            icon: "success",
+
+                            buttons: true,
+                            buttons: "OK"
+                        }).then((value) => {
+                            liff.closeWindow();
+                        });
+
+                      	validated = false;
+
+                      } else  {
+                      
+                      if ($("#locationArea").val() == "0") {
+                        swal("บันทึกข้อมูลไม่สำเร็จ!", "กรุณาเลือกพื้นที่", "warning");  
+                      } else {
+                      }
+			       if ($("#ldpe").val() == "") {
+                        swal("บันทึกข้อมูลไม่สำเร็จ!", "กรุณาเลือกพื้นที่กรุณากรอก น้ำหนักของ ถุงพลาสติกยืด", "warning");  
+                      } else {
+                      }
+			       if ($("#pet").val() == "") {
+                        swal("บันทึกข้อมูลไม่สำเร็จ!", "กรุณากรอก น้ำหนักของ ขวดพลาสติก", "warning");  
+                      } else {
+                      }
+			       if ($("#hdpe").val() == "") {
+                        swal("บันทึกข้อมูลไม่สำเร็จ!", "กรุณากรอก น้ำหนักของ พลาสติกแข็ง", "warning");  
+                      } else {
+                      }
+			       if ($("#paper").val() == "") {
+                        swal("บันทึกข้อมูลไม่สำเร็จ!", "กรุณากรอก น้ำหนักของ กระดาษ", "warning");  
+                      } else {
+                      }
+			       if ($("#au").val() == "") {
+                        swal("บันทึกข้อมูลไม่สำเร็จ!", "กรุณากรอก น้ำหนักของ อะลูมิเนียม/โลหะ", "warning");  
+                      } else {
+                      }
+			       if ($("#glass").val() == "") {
+                        swal("บันทึกข้อมูลไม่สำเร็จ!", "กรุณากรอก น้ำหนักของ ขวดแก้ว", "warning");  
+                      } else {
+                      }
+			       if ($("#n15").val() == "") {
+                        swal("บันทึกข้อมูลไม่สำเร็จ!", "กรุณากรอก น้ำหนักของ วัสดุเชื้อเพลิง", "warning");  
+                      } else {
+                      }
+			       if ($("#foodWaste").val() == "") {
+                        swal("บันทึกข้อมูลไม่สำเร็จ!", "กรุณากรอก น้ำหนักของ เศษอาหาร", "warning");  
+                      } else {
+                      }
+			        if ($("#Detail").val() == "") {
+                        swal("บันทึกข้อมูลไม่สำเร็จ!", "กรุณากรอก รายละเอียด", "warning");  
+                      } else {
+                      }
+                     
+                      }
+                    });
+		
+	
+	       
+          function validateFeild(){
+				
+          if ($("#locationArea").val() == "0") {
+						validated =  false;           
+						return false;
+					} else {
+						validated = true;
+					}
+          if ($("#ldpe").val() == "") {
+						validated =  false;           
+						return false;
+					} else {
+           
+						validated = true;
+					}
+		   if ($("#pet").val() == "") {
+						validated =  false;           
+						return false;
+					} else {
+           
+						validated = true;
+					}
+		   if ($("#hdpe").val() == "") {
+						validated =  false;           
+						return false;
+					} else {
+           
+						validated = true;
+					}
+		   if ($("#paper").val() == "") {
+						validated =  false;           
+						return false;
+					} else {
+           
+						validated = true;
+					}
+		   if ($("#au").val() == "") {
+						validated =  false;           
+						return false;
+					} else {
+           
+						validated = true;
+					}
+		   if ($("#glass").val() == "") {
+						validated =  false;           
+						return false;
+					} else {
+           
+						validated = true;
+					}
+		   if ($("#n15").val() == "") {
+						validated =  false;           
+						return false;
+					} else {
+           
+						validated = true;
+					}
+		  if ($("#foodWaste").val() == "") {
+						validated =  false;           
+						return false;
+					} else {
+           
+						validated = true;
+					}
+		   if ($("#Detail").val() == "") {
+						validated =  false;           
+						return false;
+					} else {
+           
+						validated = true;
+					}
+		  
+          };
+        });
+      </script>
+
+  </body>
+</html>
